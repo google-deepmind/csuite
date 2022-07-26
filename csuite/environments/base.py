@@ -5,7 +5,7 @@ from typing import Any
 
 from dm_env import specs
 
-# TODO(rosiezhao): Make observation and action types more specific.
+# TODO(b/240199288): Make observation and action types more specific.
 
 
 class Environment(abc.ABC):

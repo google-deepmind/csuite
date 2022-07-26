@@ -115,7 +115,7 @@ def sparse_reward(state: State,
 
 
 # Dense reward implemented from Atkeson and Santamaria (1997).
-# TODO(rosiezhao): Decide whether we want to include dense reward for this env.
+# TODO(b/240199026): Decide whether we want to include dense reward.
 def dense_reward(state: State, torque: float, stepsize: float) -> float:
   """Returns a dense reward for the continuing pendulum problem.
 
@@ -145,7 +145,7 @@ def _alias_angle(angle: float) -> float:
   return angle % (2 * np.pi)
 
 
-# TODO(rosiezhao): Update docstring with different versions of pendulum.
+# TODO(b/240199204): Update docstring with different versions of pendulum.
 class Pendulum(base.Environment):
   """A continuing pendulum environment.
 
