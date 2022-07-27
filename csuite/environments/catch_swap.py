@@ -41,7 +41,7 @@ _INVALID_BALLS_RANGE = (
 _ROWS = 10
 _COLUMNS = 5
 _SPAWN_PROBABILITY = 0.1
-_SWAP_PROBABILITY = 0.01
+_SWAP_EVERY = 10000
 
 
 class Action(enum.IntEnum):
@@ -64,13 +64,13 @@ class Params:
     columns: Integer number of columns.
     observation_dim: Integer dimension of the observation features.
     spawn_probability: Probability of a new ball spawning.
-    swap_probability: Probability that two observation features are swapped.
+    swap_every: Integer giving the interval at which a swap occurs.
   """
   rows: int
   columns: int
   observation_dim: int
   spawn_probability: float
-  swap_probability: float
+  swap_every: int
 
 
 @dataclasses.dataclass
@@ -83,11 +83,14 @@ class State:
     balls: A list of (x, y) coordinates representing the present balls.
     shuffle_idx: Indices for performing the observation shuffle as a result of
       the random swaps.
+    time_since_swap: An integer denoting how many timesteps have elapsed
+      since the last swap.
   """
   paddle_x: int
   paddle_y: int
   balls: list[tuple[int, int]]
   shuffle_idx: np.ndarray
+  time_since_swap: int
 
 
 class CatchSwap(base.Environment):
@@ -106,7 +109,7 @@ class CatchSwap(base.Environment):
                columns=_COLUMNS,
                spawn_probability=_SPAWN_PROBABILITY,
                seed=None,
-               swap_probability=_SWAP_PROBABILITY):
+               swap_every=_SWAP_EVERY):
     """Initializes a continuing Catch environment.
 
     Args:
@@ -114,15 +117,15 @@ class CatchSwap(base.Environment):
       columns: A positive integer denoting the number of columns.
       spawn_probability: Float giving the probability of a new ball appearing.
       seed: Seed for the internal random number generator.
-      swap_probability: Float giving the probability that two observation
-        features are swapped.
+      swap_every: A positive integer denoting the interval at which a swap in
+        the observation occurs.
     """
     self._rng = np.random.RandomState(seed)
     self._params = Params(rows=rows,
                           columns=columns,
                           observation_dim=rows * columns,
                           spawn_probability=spawn_probability,
-                          swap_probability=swap_probability)
+                          swap_every=swap_every)
     self._state = None
 
   def start(self):
@@ -135,7 +138,8 @@ class CatchSwap(base.Environment):
         paddle_x=self._params.columns // 2,
         paddle_y=self._params.rows - 1,
         balls=[(self._rng.randint(self._params.columns), 0)],
-        shuffle_idx=np.arange(self._params.observation_dim)
+        shuffle_idx=np.arange(self._params.observation_dim),
+        time_since_swap=0,
     )
     return self._get_observation()
 
@@ -175,17 +179,21 @@ class CatchSwap(base.Environment):
       # Remove ball from list.
       self._state.balls = self._state.balls[1:]
 
-    # Add new ball with given probability or if a ball was removed.
+    # Add new ball with given probability.
     if self._rng.random() < self._params.spawn_probability:
       self._state.balls.append((self._rng.randint(self._params.columns), 0))
 
+    # Update time since last swap.
+    self._state.time_since_swap += 1
+
     # Update the observation permutation indices by swapping two indices,
-    # with the given probability.
-    if self._rng.random() < self._params.swap_probability:
+    # at the given interval.
+    if self._state.time_since_swap % self._params.swap_every == 0:
       idx_1, idx_2 = self._rng.randint(self._params.observation_dim, size=2).T
       self._state.shuffle_idx[[idx_1, idx_2]] = (
           self._state.shuffle_idx[[idx_2, idx_1]]
       )
+      self._state.time_since_swap = 0
 
     return self._get_observation(), reward
 
