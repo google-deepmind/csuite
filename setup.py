@@ -42,8 +42,7 @@ setup(
         'A collection of continuing environments for reinforcement learning.'),
     long_description=open(os.path.join(_CURRENT_DIR, 'README.md')).read(),
     long_description_content_type='text/markdown',
-    # TODO(zaheersm): Use a more friendly email than buganizer component alias.
-    author_email='buganizer-system+1073031@google.com',
+    author_email='csuite@google.com',
     keywords='reinforcement-learning environment suite python machine learning',
     packages=find_namespace_packages(exclude=['*_test.py']),
     install_requires=_parse_requirements(
