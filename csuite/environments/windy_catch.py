@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Windy catch environment.
+"""WindyCatch environment.
 
 Environment description can be found in the `WindyCatch` environment class.
 """
