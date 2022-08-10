@@ -22,16 +22,6 @@ from setuptools import setup
 _CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-def _parse_requirements(path):
-
-  with open(os.path.join(_CURRENT_DIR, path)) as f:
-    return [
-        line.rstrip()
-        for line in f
-        if not (line.isspace() or line.startswith('#'))
-    ]
-
-
 setup(
     name='csuite',
     version='0.1.0',
@@ -45,10 +35,13 @@ setup(
     author_email='csuite@google.com',
     keywords='reinforcement-learning environment suite python machine learning',
     packages=find_namespace_packages(exclude=['*_test.py']),
-    install_requires=_parse_requirements(
-        os.path.join(_CURRENT_DIR, 'requirements.txt')),
-    tests_require=_parse_requirements(
-        os.path.join(_CURRENT_DIR, 'requirements-test.txt')),
+    install_requires=[
+        'dm_env>=1.5',
+        'numpy>=1.18.0',
+        'Pillow>=9.0.1',
+        'absl-py>=0.7.1',
+        'pytest>=6.2.5',
+    ],
     zip_safe=False,  # Required for full installation.
     python_requires='>=3.7',
     classifiers=[

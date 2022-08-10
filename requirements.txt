@@ -1,3 +1,3 @@
-dm_env>=1.5
-numpy>=1.18.0
-Pillow>=9.0.1
+dm_env==1.5
+numpy==1.23.1
+Pillow==9.2.0
