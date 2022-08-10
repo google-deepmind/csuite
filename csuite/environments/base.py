@@ -16,7 +16,7 @@
 """Abstract base class for csuite environments."""
 
 import abc
-from typing import Any
+from typing import Any, Tuple
 
 from dm_env import specs
 
@@ -39,7 +39,7 @@ class Environment(abc.ABC):
     """
 
   @abc.abstractmethod
-  def step(self, action: Any) -> Any:
+  def step(self, action: Any) -> Tuple[Any, Any]:
     """Takes a step in the environment, returning an observation and reward."""
 
   @abc.abstractmethod
