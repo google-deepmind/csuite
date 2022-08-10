@@ -34,11 +34,9 @@ _INVALID_PADDLE_POS = ("Invalid state: paddle should be positioned at the"
                        " bottom of the board.")
 _INVALID_BALLS_RANGE = (
     "Invalid state: positions of balls and paddle not in expected"
-    " row range [0, {rows}) and column range [0, {columns})."
-)
+    " row range [0, {rows}) and column range [0, {columns}).")
 _INVALID_WIND_DIRECTION = (
-    "Invalid state: expected exactly one entry of wind_direction to be True."
-)
+    "Invalid state: expected exactly one entry of wind_direction to be True.")
 
 # Default environment variables.
 _ROWS = 10
@@ -86,8 +84,8 @@ class State:
     paddle_x: An integer denoting the x-coordinate of the paddle.
     paddle_y: An integer denoting the y-coordinate of the paddle
     balls: A list of (x, y) coordinates representing the present balls.
-    wind_direction: List of three booleans (no wind, left wind, right 
-      wind); only one is True.   
+    wind_direction: List of three booleans (no wind, left wind, right wind);
+      only one is True.
     time_since_wind_change: An integer denoting how many timesteps have elapsed
       since the last change in wind direction.
   """
@@ -100,14 +98,14 @@ class State:
 
 class WindyCatch(base.Environment):
   """A windy catch enviornment.
-  
+
   Wind moves a falling ball by a column, depending on the direction. Leftward
   wind moves the ball to the left, rightware wind moves the ball to
   the right. If there is no wind, the ball stays in the same column. The
   direction of the wind (or absence thereof) is observable through three bits
   the activations of which are mutually exclusive.  Every K steps, the wind
-  changes to one of the three possibilities. 
-  
+  changes to one of the three possibilities.
+
   The environment is fully-observable and has stationary dynamics.
   """
 
@@ -128,11 +126,12 @@ class WindyCatch(base.Environment):
         changes.
     """
     self._rng = np.random.RandomState(seed)
-    self._params = Params(rows=rows,
-                          columns=columns,
-                          observation_dim=rows * columns + 3,
-                          spawn_probability=spawn_probability,
-                          change_every=change_every)
+    self._params = Params(
+        rows=rows,
+        columns=columns,
+        observation_dim=rows * columns + 3,
+        spawn_probability=spawn_probability,
+        change_every=change_every)
     self._state = None
 
   def start(self):
@@ -172,14 +171,16 @@ class WindyCatch(base.Environment):
       raise ValueError(_INVALID_ACTION.format(action=action))
 
     # Move the paddle.
-    self._state.paddle_x = np.clip(self._state.paddle_x + Action(action).dx,
-                                   0, self._params.columns - 1)
+    self._state.paddle_x = np.clip(self._state.paddle_x + Action(action).dx, 0,
+                                   self._params.columns - 1)
 
     # Move all balls down by one unit, with wind.
-    wd = _WIND_DELTA[self._state.wind_direction.index(True)] 
-    self._state.balls = [((x + wd) % self._params.columns, # apply wind.
-                          y + 1)  # apply gravity.
-                         for x, y in self._state.balls]
+    wd = _WIND_DELTA[self._state.wind_direction.index(True)]
+    self._state.balls = [
+        # x coord: applies wind; y coord: gravity
+        ((x + wd) % self._params.columns, y + 1)
+        for x, y in self._state.balls
+    ]
 
     # Since at most one ball is added at each timestep, at most one ball
     # can be at the bottom of the board, and must be the 'oldest' ball.
@@ -220,8 +221,12 @@ class WindyCatch(base.Environment):
 
   def observation_spec(self):
     """Describes the observation specs of the environment."""
-    return specs.BoundedArray(shape=(self._params.observation_dim,),
-                              dtype=int, minimum=0, maximum=1, name="board")
+    return specs.BoundedArray(
+        shape=(self._params.observation_dim,),
+        dtype=int,
+        minimum=0,
+        maximum=1,
+        name="board")
 
   def action_spec(self):
     """Describes the action specs of the environment."""
@@ -238,17 +243,18 @@ class WindyCatch(base.Environment):
       state: A State object which overrides the current state.
     """
     # Check that input state values are valid.
-    if  not (0 <= state.paddle_x < self._params.columns
-             and state.paddle_y == self._params.rows - 1):
+    if not (0 <= state.paddle_x < self._params.columns and
+            state.paddle_y == self._params.rows - 1):
       raise ValueError(_INVALID_PADDLE_POS)
 
     for x, y in state.balls:
       if not (0 <= x < self._params.columns and 0 <= y < self._params.rows):
-        raise ValueError(_INVALID_BALLS_RANGE.format(
-            rows=self._params.rows, columns=self._params.columns))
-    
+        raise ValueError(
+            _INVALID_BALLS_RANGE.format(
+                rows=self._params.rows, columns=self._params.columns))
+
     if sum(state.wind_direction) != 1:
-        raise ValueError(_INVALID_WIND_DIRECTION)
+      raise ValueError(_INVALID_WIND_DIRECTION)
 
     self._state = copy.deepcopy(state)
 

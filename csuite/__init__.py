@@ -21,9 +21,9 @@ from typing import Dict, Optional, Union
 from csuite.environments import access_control
 from csuite.environments import catch
 from csuite.environments import catch_swap
-from csuite.environments import windy_catch
 from csuite.environments import pendulum
 from csuite.environments import taxi
+from csuite.environments import windy_catch
 from csuite.utils import dm_env_wrapper
 
 
