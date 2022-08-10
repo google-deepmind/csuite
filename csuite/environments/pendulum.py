@@ -227,7 +227,7 @@ class Pendulum(base.Environment):
   def start(self):
     """Initializes the environment and returns an initial observation."""
     self._state = self._params.start_state_fn()
-    return np.array([self._state.angle, self._state.velocity])
+    return np.array([self._state.angle, self._state.velocity], dtype=np.float32)
 
   def step(self, action):
     """Updates the environment state and returns an observation and reward.
@@ -271,7 +271,7 @@ class Pendulum(base.Environment):
 
     self._state = State(angle=new_angle, velocity=new_velocity)
     return (
-        np.array([self._state.angle, self._state.velocity]),
+        np.array([self._state.angle, self._state.velocity], dtype=np.float32),
         self._params.reward_fn(self._state,
                                self._torque,
                                self._params.simulation_step_size)
