@@ -229,6 +229,12 @@ class Pendulum(base.Environment):
     self._state = self._params.start_state_fn()
     return np.array([self._state.angle, self._state.velocity], dtype=np.float32)
 
+  @property
+  def started(self):
+    """True if the environment has been started, False otherwise."""
+    # An unspecified state implies that the environment needs to be started.
+    return self._state is not None
+
   def step(self, action):
     """Updates the environment state and returns an observation and reward.
 
@@ -244,7 +250,7 @@ class Pendulum(base.Environment):
       RuntimeError: If state has not yet been initialized by `start`.
     """
     # Check if state has been initialized.
-    if self._state is None:
+    if not self.started:
       raise RuntimeError(_STEP_WITHOUT_START)
 
     self._torque = Action(action).tau

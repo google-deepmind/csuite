@@ -218,6 +218,12 @@ class Taxi(base.Environment):
     )
     return self._get_observation()
 
+  @property
+  def started(self):
+    """True if the environment has been started, False otherwise."""
+    # An unspecified state implies that the environment needs to be started.
+    return self._state is not None
+
   def step(self, action):
     """Updates the environment state and returns an observation and reward.
 
@@ -233,7 +239,7 @@ class Taxi(base.Environment):
       ValueError: If input action has an invalid value.
     """
     # Check if state has been initialized.
-    if self._state is None:
+    if not self.started:
       raise RuntimeError(_STEP_WITHOUT_START)
 
     # Check if input action is valid.
