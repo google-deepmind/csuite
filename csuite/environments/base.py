@@ -20,20 +20,20 @@ from typing import Any, Tuple
 
 from dm_env import specs
 
-# TODO(b/240199288): Make observation and action types more specific.
-
 
 class Environment(abc.ABC):
   """Base class for continuing environments.
 
   Observations and valid actions are described by the `specs` module in dm_env.
+  Environment implementations should return specs as specific as possible.
+
   Each environment will specify its own environment State, Configuration, and
   internal random number generator.
   """
 
   @abc.abstractmethod
   def start(self) -> Any:
-    """Starts the environment by setting the initial state.
+    """Starts (or restarts) the environment by setting the initial state.
 
     Returns an initial observation.
     """
@@ -46,14 +46,16 @@ class Environment(abc.ABC):
   def observation_spec(self) -> specs.Array:
     """Describes the observation space of the environment.
 
-    Returns an `Array` object from dm_env.specs.
+    May use a subclass of `specs.Array` that specifies additional properties
+    such as min and max bounds on the values.
     """
 
   @abc.abstractmethod
   def action_spec(self) -> specs.Array:
     """Describes the valid action space of the environment.
 
-    Returns an `Array` object from dm_env.specs.
+    May use a subclass of `specs.Array` that specifies additional properties
+    such as min and max bounds on the values.
     """
 
   @abc.abstractmethod
