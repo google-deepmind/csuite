@@ -25,6 +25,7 @@ from csuite.environments import pendulum
 from csuite.environments import taxi
 from csuite.environments import windy_catch
 from csuite.utils import dm_env_wrapper
+from csuite.utils import gym_wrapper
 
 
 class EnvName(enum.Enum):
