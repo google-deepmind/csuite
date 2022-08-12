@@ -24,12 +24,16 @@ class DMEnvFromCSuite(dm_env.Environment):
 
   def __init__(self, csuite_env: base.Environment):
     self._csuite_env = csuite_env
+    self._started = False
 
   def reset(self) -> dm_env.TimeStep:
     observation = self._csuite_env.start()
+    self._started = True
     return dm_env.restart(observation)
 
   def step(self, action) -> dm_env.TimeStep:
+    if not self._started:
+      return self.reset()
     # Convert the csuite step result to a dm_env TimeStep.
     observation, reward = self._csuite_env.step(action)
     return dm_env.TimeStep(
