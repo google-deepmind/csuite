@@ -1,7 +1,7 @@
 # Continuing Environments for Reinforcement Learning (`csuite`)
 
 
-CSuite is a collection of carefully-curated synthetic environments designed for
+CSuite is a collection of carefully-curated synthetic environments for
 research in the continuing setting: the agent-environment interaction goes on
 forever without limit, with no natural episode boundaries.
 
