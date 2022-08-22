@@ -10,7 +10,7 @@ forever without limit, with no natural episode boundaries.
 Clone the source code into a local directory and install using pip:
 
 ```sh
-git clone sso://team/deepmind-eng/csuite /path/to/local/csuite/
+git clone https://github.com/deepmind/csuite.git /path/to/local/csuite/
 pip install /path/to/local/csuite/
 ```
 
@@ -49,3 +49,4 @@ for _ in range(NUM_STEPS):
   timestep = env.step(action)
   action = agent.step(timestep)
 ```
+
