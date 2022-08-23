@@ -37,6 +37,7 @@ setup(
     packages=find_namespace_packages(exclude=['*_test.py']),
     install_requires=[
         'dm_env>=1.5',
+        'gym>=0.25.0',
         'numpy>=1.18.0',
         'Pillow>=9.0.1',
         'absl-py>=0.7.1',
