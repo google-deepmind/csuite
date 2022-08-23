@@ -46,16 +46,19 @@ class AccessControlTest(parameterized.TestCase):
     """Tests setting environment state with invalid fields."""
     env = access_control.AccessControl()
     _ = env.start()
+    cur_state = env.get_state()
 
     with self.subTest(name='invalid_state'):
-      new_state = access_control.State(5, -1)
+      cur_state.num_busy_servers = 5
+      cur_state.incoming_priority = -1
       with self.assertRaises(ValueError):
-        env.set_state(new_state)
+        env.set_state(cur_state)
 
     with self.subTest(name='invalid_priority'):
-      new_state = access_control.State(-1, 8)
+      cur_state.num_busy_servers = -1
+      cur_state.incoming_priority = 8
       with self.assertRaises(ValueError):
-        env.set_state(new_state)
+        env.set_state(cur_state)
 
   @parameterized.parameters(0, 1, 9, 10)
   def test_one_step(self, new_num_busy_servers):

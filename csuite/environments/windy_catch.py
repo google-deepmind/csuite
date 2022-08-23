@@ -88,12 +88,15 @@ class State:
       only one is True.
     time_since_wind_change: An integer denoting how many timesteps have elapsed
       since the last change in wind direction.
+    rng: Internal NumPy pseudo-random number generator, included here for
+      reproducibility purposes.
   """
   paddle_x: int
   paddle_y: int
   balls: list[tuple[int, int]]
   wind_direction: list[bool]
   time_since_wind_change: int
+  rng: np.random.RandomState
 
 
 class WindyCatch(base.Environment):
@@ -125,7 +128,7 @@ class WindyCatch(base.Environment):
       change_every: A positive integer denoting the interval at which wind
         changes.
     """
-    self._rng = np.random.RandomState(seed)
+    self._seed = seed
     self._params = Params(
         rows=rows,
         columns=columns,
@@ -140,12 +143,14 @@ class WindyCatch(base.Environment):
     # The initial state has one ball appearing in a random column at the top,
     # and the paddle centered at the bottom.
 
+    rng = np.random.RandomState(self._seed)
     self._state = State(
         paddle_x=self._params.columns // 2,
         paddle_y=self._params.rows - 1,
-        balls=[(self._rng.randint(self._params.columns), 0)],
+        balls=[(rng.randint(self._params.columns), 0)],
         wind_direction=[True, False, False],
         time_since_wind_change=0,
+        rng=rng,
     )
     return self._get_observation()
 
@@ -197,8 +202,10 @@ class WindyCatch(base.Environment):
       self._state.balls = self._state.balls[1:]
 
     # Add new ball with given probability.
-    if self._rng.random() < self._params.spawn_probability:
-      self._state.balls.append((self._rng.randint(self._params.columns), 0))
+    if self._state.rng.random() < self._params.spawn_probability:
+      self._state.balls.append(
+          (self._state.rng.randint(self._params.columns), 0)
+      )
 
     # Update time since last change in wind.
     self._state.time_since_wind_change += 1
@@ -206,7 +213,7 @@ class WindyCatch(base.Environment):
     # Update the wind direction.
     if self._state.time_since_wind_change % self._params.change_every == 0:
       self._state.wind_direction = [False, False, False]
-      self._state.wind_direction[self._rng.randint(3)] = True
+      self._state.wind_direction[self._state.rng.randint(3)] = True
       self._state.time_since_wind_change = 0
 
     return self._get_observation(), reward

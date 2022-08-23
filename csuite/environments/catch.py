@@ -77,10 +77,13 @@ class State:
     paddle_x: An integer denoting the x-coordinate of the paddle.
     paddle_y: An integer denoting the y-coordinate of the paddle
     balls: A list of (x, y) coordinates representing the present balls.
+    rng: Internal NumPy pseudo-random number generator, included here for
+      reproducibility purposes.
   """
   paddle_x: int
   paddle_y: int
   balls: list[tuple[int, int]]
+  rng: np.random.RandomState
 
 
 class Catch(base.Environment):
@@ -113,7 +116,7 @@ class Catch(base.Environment):
       spawn_probability: Float giving the probability of a new ball appearing.
       seed: Seed for the internal random number generator.
     """
-    self._rng = np.random.RandomState(seed)
+    self._seed = seed
     self._params = Params(rows=rows, columns=columns,
                           spawn_probability=spawn_probability)
     self._state = None
@@ -124,10 +127,12 @@ class Catch(base.Environment):
     # The initial state has one ball appearing in a random column at the top,
     # and the paddle centered at the bottom.
 
+    rng = np.random.RandomState(self._seed)
     self._state = State(
         paddle_x=self._params.columns // 2,
         paddle_y=self._params.rows - 1,
-        balls=[(self._rng.randint(self._params.columns), 0)],
+        balls=[(rng.randint(self._params.columns), 0)],
+        rng=rng,
     )
     return self._get_observation()
 
@@ -174,8 +179,10 @@ class Catch(base.Environment):
       self._state.balls = self._state.balls[1:]
 
     # Add new ball with given probability or if a ball was removed.
-    if self._rng.random() < self._params.spawn_probability:
-      self._state.balls.append((self._rng.randint(self._params.columns), 0))
+    if self._state.rng.random() < self._params.spawn_probability:
+      self._state.balls.append(
+          (self._state.rng.randint(self._params.columns), 0)
+      )
 
     return self._get_observation(), reward
 

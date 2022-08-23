@@ -76,9 +76,12 @@ class State:
     num_busy_servers: An integer in the range [0, N] representing the number of
       busy servers.
     incoming_priority: An integer giving the priority of the incoming customer.
+    rng: Internal NumPy pseudo-random number generator, included here for
+      reproducibility purposes.
   """
   num_busy_servers: int
   incoming_priority: int
+  rng: np.random.RandomState
 
 
 class AccessControl(base.Environment):
@@ -116,7 +119,7 @@ class AccessControl(base.Environment):
         customers.
       seed: Seed for the internal random number generator.
     """
-    self._rng = np.random.RandomState(seed)
+    self._seed = seed
     self._params = Params(
         num_servers=num_servers,
         free_probability=free_probability,
@@ -135,9 +138,11 @@ class AccessControl(base.Environment):
 
   def start(self):
     """Initializes the environment and returns an initial observation."""
+    rng = np.random.RandomState(self._seed)
     self._state = State(
         num_busy_servers=0,
-        incoming_priority=self._rng.choice(self._params.priorities)
+        incoming_priority=rng.choice(self._params.priorities),
+        rng=rng
     )
     return self._get_observation()
 
@@ -175,12 +180,14 @@ class AccessControl(base.Environment):
       reward = self._state.incoming_priority
       self._state.num_busy_servers += 1
 
-    new_priority = self._rng.choice(self._params.priorities)
+    new_priority = self._state.rng.choice(self._params.priorities)
 
     # Update internal state by freeing busy servers with a given probability.
     num_busy_servers = self._state.num_busy_servers
-    num_new_free_servers = self._rng.binomial(num_busy_servers,
-                                              p=self._params.free_probability)
+    num_new_free_servers = self._state.rng.binomial(
+        num_busy_servers,
+        p=self._params.free_probability
+    )
     self._state.num_busy_servers = num_busy_servers - num_new_free_servers
     self._state.incoming_priority = new_priority
 

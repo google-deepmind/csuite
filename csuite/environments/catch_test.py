@@ -113,11 +113,14 @@ class CatchTest(parameterized.TestCase):
     env = catch.Catch()
     env.start()
     params = env.get_config()
+    cur_state = env.get_state()
 
     with self.subTest(name='no_collision_with_paddle'):
       # Set environment state to immediately before ball falls to the bottom.
-      env.set_state(catch.State(paddle_x=0, paddle_y=params.rows - 1,
-                                balls=[(2, params.rows - 2)]))
+      cur_state.paddle_x = 0
+      cur_state.paddle_y = params.rows - 1
+      cur_state.balls = [(2, params.rows - 2)]
+      env.set_state(cur_state)
       _, reward = env.step(catch.Action.STAY)
 
       # Reward returned should equal -1.
@@ -125,8 +128,10 @@ class CatchTest(parameterized.TestCase):
 
     with self.subTest(name='collision_with_paddle'):
       # Set environment state to immediately before ball falls to the bottom.
-      env.set_state(catch.State(paddle_x=2, paddle_y=params.rows - 1,
-                                balls=[(2, params.rows - 2)]))
+      cur_state.paddle_x = 2
+      cur_state.paddle_y = params.rows - 1
+      cur_state.balls = [(2, params.rows - 2)]
+      env.set_state(cur_state)
       _, reward = env.step(catch.Action.STAY)
 
       # Reward returned should equal 1.
@@ -137,11 +142,14 @@ class CatchTest(parameterized.TestCase):
     env = catch.Catch()
     env.start()
     params = env.get_config()
+    cur_state = env.get_state()
 
     # Set environment state such that ball and paddle are horizontally centered
     # and the ball is at the top of the board.
-    env.set_state(catch.State(paddle_x=2, paddle_y=params.rows - 1,
-                              balls=[(2, 0)]))
+    cur_state.paddle_x = 2
+    cur_state.paddle_y = params.rows - 1
+    cur_state.balls = [(2, 0)]
+    env.set_state(cur_state)
 
     # For eight steps, alternate between moving left and right.
     for _ in range(4):
@@ -161,11 +169,14 @@ class CatchTest(parameterized.TestCase):
     env = catch.Catch()
     env.start()
     params = env.get_config()
+    cur_state = env.get_state()
 
     # Set environment state such that there are two balls at the top and the
     # second row of the board, and paddle is horizontally centered.
-    env.set_state(catch.State(paddle_x=2, paddle_y=params.rows - 1,
-                              balls=[(0, 1), (2, 0)]))
+    cur_state.paddle_x = 2
+    cur_state.paddle_y = params.rows - 1
+    cur_state.balls = [(0, 1), (2, 0)]
+    env.set_state(cur_state)
 
     # For eight steps, repeatedly move left - ball in second row should fall on
     # paddle.

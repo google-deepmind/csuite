@@ -85,12 +85,15 @@ class State:
       the random swaps.
     time_since_swap: An integer denoting how many timesteps have elapsed
       since the last swap.
+    rng: Internal NumPy pseudo-random number generator, included here for
+      reproducibility purposes.
   """
   paddle_x: int
   paddle_y: int
   balls: list[tuple[int, int]]
   shuffle_idx: np.ndarray
   time_since_swap: int
+  rng: np.random.RandomState
 
 
 class CatchSwap(base.Environment):
@@ -120,7 +123,7 @@ class CatchSwap(base.Environment):
       swap_every: A positive integer denoting the interval at which a swap in
         the observation occurs.
     """
-    self._rng = np.random.RandomState(seed)
+    self._seed = seed
     self._params = Params(rows=rows,
                           columns=columns,
                           observation_dim=rows * columns,
@@ -134,12 +137,14 @@ class CatchSwap(base.Environment):
     # The initial state has one ball appearing in a random column at the top,
     # and the paddle centered at the bottom.
 
+    rng = np.random.RandomState(self._seed)
     self._state = State(
         paddle_x=self._params.columns // 2,
         paddle_y=self._params.rows - 1,
-        balls=[(self._rng.randint(self._params.columns), 0)],
+        balls=[(rng.randint(self._params.columns), 0)],
         shuffle_idx=np.arange(self._params.observation_dim),
         time_since_swap=0,
+        rng=rng,
     )
     return self._get_observation()
 
@@ -186,8 +191,10 @@ class CatchSwap(base.Environment):
       self._state.balls = self._state.balls[1:]
 
     # Add new ball with given probability.
-    if self._rng.random() < self._params.spawn_probability:
-      self._state.balls.append((self._rng.randint(self._params.columns), 0))
+    if self._state.rng.random() < self._params.spawn_probability:
+      self._state.balls.append(
+          (self._state.rng.randint(self._params.columns), 0)
+      )
 
     # Update time since last swap.
     self._state.time_since_swap += 1
@@ -195,7 +202,8 @@ class CatchSwap(base.Environment):
     # Update the observation permutation indices by swapping two indices,
     # at the given interval.
     if self._state.time_since_swap % self._params.swap_every == 0:
-      idx_1, idx_2 = self._rng.randint(self._params.observation_dim, size=2).T
+      idx_1, idx_2 = self._state.rng.randint(self._params.observation_dim,
+                                             size=2).T
       self._state.shuffle_idx[[idx_1, idx_2]] = (
           self._state.shuffle_idx[[idx_2, idx_1]]
       )

@@ -57,23 +57,26 @@ class TaxiTest(parameterized.TestCase):
     """Tests one step with a movement action (North, East, South, West)."""
     env = taxi.Taxi()
     env.start()
+    cur_state = env.get_state()
 
     # Create new state from input parameters and set environment to this state.
-    test_state = taxi.State(taxi_x=x, taxi_y=y,
-                            passenger_loc=0, destination=2)
-    env.set_state(test_state)
+    cur_state.taxi_x = x
+    cur_state.taxi_y = y
+    cur_state.passenger_loc = 0
+    cur_state.destination = 2
+    env.set_state(cur_state)
 
     # Take movement step provided.
     env.step(action)
-    cur_state = env.get_state()
+    next_state = env.get_state()
     if can_move:
-      self.assertEqual(cur_state.taxi_x,
-                       test_state.taxi_x + taxi.Action(action).dx)
-      self.assertEqual(cur_state.taxi_y,
-                       test_state.taxi_y + taxi.Action(action).dy)
+      self.assertEqual(next_state.taxi_x,
+                       cur_state.taxi_x + taxi.Action(action).dx)
+      self.assertEqual(next_state.taxi_y,
+                       cur_state.taxi_y + taxi.Action(action).dy)
     else:
-      self.assertEqual(cur_state.taxi_x, test_state.taxi_x)
-      self.assertEqual(cur_state.taxi_y, test_state.taxi_y)
+      self.assertEqual(next_state.taxi_x, cur_state.taxi_x)
+      self.assertEqual(next_state.taxi_y, cur_state.taxi_y)
 
   @parameterized.parameters((0, 0, 0, 2, taxi.Action.PICKUP, True),
                             (0, 1, 0, 2, taxi.Action.PICKUP, False),
@@ -85,11 +88,14 @@ class TaxiTest(parameterized.TestCase):
     """Tests the two passenger actions (pickup and dropoff)."""
     env = taxi.Taxi()
     env.start()
+    cur_state = env.get_state()
 
     # Create new state from input parameters and set environment to this state.
-    test_state = taxi.State(taxi_x=x, taxi_y=y,
-                            passenger_loc=pass_loc, destination=dest)
-    env.set_state(test_state)
+    cur_state.taxi_x = x
+    cur_state.taxi_y = y
+    cur_state.passenger_loc = pass_loc
+    cur_state.destination = dest
+    env.set_state(cur_state)
     _, reward = env.step(action)
 
     # Check correct reward: for successful dropoffs, reward is 20. For
@@ -103,19 +109,23 @@ class TaxiTest(parameterized.TestCase):
 
     if is_success and action == taxi.Action.PICKUP:
       # Check passenger is in the taxi.
-      cur_state = env.get_state()
-      self.assertEqual(cur_state.passenger_loc, 4)
+      next_state = env.get_state()
+      self.assertEqual(next_state.passenger_loc, 4)
 
   def test_runs_from_start(self):
     """Tests running a full passenger pickup and dropoff sequence."""
     env = taxi.Taxi()
     env.start()
+    cur_state = env.get_state()
+
     # Set state to have passenger and taxi on the red square, and destination
     # on the blue square.
-    env.set_state(taxi.State(taxi_x=0,
-                             taxi_y=0,
-                             passenger_loc=0,
-                             destination=3))
+    cur_state.taxi_x = 0
+    cur_state.taxi_y = 0
+    cur_state.passenger_loc = 0
+    cur_state.destination = 3
+
+    env.set_state(cur_state)
     # Pick up the passenger.
     env.step(taxi.Action.PICKUP)
 

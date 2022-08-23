@@ -166,6 +166,7 @@ class State:
   taxi_y: int
   passenger_loc: int
   destination: int
+  rng: np.random.RandomState
 
 
 class Taxi(base.Environment):
@@ -196,7 +197,7 @@ class Taxi(base.Environment):
     Args:
       seed: Seed for the internal random number generator.
     """
-    self._rng = np.random.RandomState(seed)
+    self._seed = seed
     self._state = None
 
     # Populate lookup table for observations.
@@ -210,11 +211,13 @@ class Taxi(base.Environment):
 
   def start(self):
     """Initializes the environment and returns an initial observation."""
+    rng = np.random.RandomState(self._seed)
     self._state = State(
-        taxi_x=self._rng.randint(_NUM_COLUMNS),
-        taxi_y=self._rng.randint(_NUM_ROWS),
-        passenger_loc=self._rng.randint(_NUM_POSITIONS - 1),
-        destination=self._rng.randint(_NUM_DEST)
+        taxi_x=rng.randint(_NUM_COLUMNS),
+        taxi_y=rng.randint(_NUM_ROWS),
+        passenger_loc=rng.randint(_NUM_POSITIONS - 1),
+        destination=rng.randint(_NUM_DEST),
+        rng=rng,
     )
     return self._get_observation()
 
@@ -283,8 +286,8 @@ class Taxi(base.Environment):
       else:
         reward = 20
         # Add new passenger.
-        self._state.passenger_loc = self._rng.randint(_NUM_POSITIONS - 1)
-        self._state.destination = self._rng.randint(_NUM_DEST)
+        self._state.passenger_loc = self._state.rng.randint(_NUM_POSITIONS - 1)
+        self._state.destination = self._state.rng.randint(_NUM_DEST)
 
     return self._get_observation(), reward
 
