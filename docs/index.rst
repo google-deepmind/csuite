@@ -7,7 +7,8 @@ with no natural episode boundaries.
 
 
 .. toctree:: :caption: Environments
-   :maxdepth: 2
+   :maxdepth: 1
 
+   environments/access_control
    environments/catch
    environments/pendulum
