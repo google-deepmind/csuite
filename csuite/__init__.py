@@ -20,7 +20,7 @@ from typing import Dict, Optional, Union
 
 from csuite.environments import access_control
 from csuite.environments import catch
-from csuite.environments import catch_swap
+from csuite.environments import dancing_catch
 from csuite.environments import pendulum
 from csuite.environments import taxi
 from csuite.environments import windy_catch
@@ -31,7 +31,7 @@ from csuite.utils import gym_wrapper
 class EnvName(enum.Enum):
   ACCESS_CONTROL = 'access_control'
   CATCH = 'catch'
-  CATCH_SWAP = 'catch_swap'
+  DANCING_CATCH = 'dancing_catch'
   PENDULUM = 'pendulum'
   TAXI = 'taxi'
   WINDY_CATCH = 'windy_catch'
@@ -40,7 +40,7 @@ class EnvName(enum.Enum):
 _ENVS = {
     EnvName.ACCESS_CONTROL: access_control.AccessControl,
     EnvName.CATCH: catch.Catch,
-    EnvName.CATCH_SWAP: catch_swap.CatchSwap,
+    EnvName.DANCING_CATCH: dancing_catch.DancingCatch,
     EnvName.WINDY_CATCH: windy_catch.WindyCatch,
     EnvName.TAXI: taxi.Taxi,
     EnvName.PENDULUM: pendulum.Pendulum,

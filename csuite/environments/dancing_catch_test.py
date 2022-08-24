@@ -13,29 +13,29 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Tests for CatchSwap."""
+"""Tests for DancingCatch."""
 
 from absl.testing import absltest
 from absl.testing import parameterized
-from csuite.environments import catch_swap
+from csuite.environments import dancing_catch
 
 
-class CatchSwapTest(parameterized.TestCase):
+class DancingCatchTest(parameterized.TestCase):
 
   def test_environment_setup(self):
     """Tests environment initialization."""
-    env = catch_swap.CatchSwap()
+    env = dancing_catch.DancingCatch()
     self.assertIsNotNone(env)
 
   def test_start(self):
     """Tests environment start."""
-    env = catch_swap.CatchSwap()
+    env = dancing_catch.DancingCatch()
     params = env.get_config()
 
     with self.subTest(name='step_without_start'):
       # Calling step before start should raise an error.
       with self.assertRaises(RuntimeError):
-        env.step(catch_swap.Action.LEFT)
+        env.step(dancing_catch.Action.LEFT)
 
     with self.subTest(name='start_state'):
       start_obs = env.start()
@@ -54,7 +54,7 @@ class CatchSwapTest(parameterized.TestCase):
 
   def test_invalid_state(self):
     """Tests setting environment state with invalid fields."""
-    env = catch_swap.CatchSwap()
+    env = dancing_catch.DancingCatch()
     env.start()
 
     with self.subTest(name='paddle_out_of_range'):
@@ -72,7 +72,7 @@ class CatchSwapTest(parameterized.TestCase):
   @parameterized.parameters((0, 0, 1), (2, 1, 3), (4, 3, 4))
   def test_one_step(self, paddle_x, expected_left_x, expected_right_x):
     """Tests one environment step given the x-position of the paddle."""
-    env = catch_swap.CatchSwap()
+    env = dancing_catch.DancingCatch()
     env.start()
 
     with self.subTest(name='invalid_action'):
@@ -84,7 +84,7 @@ class CatchSwapTest(parameterized.TestCase):
       current_state.paddle_x = paddle_x
       env.set_state(current_state)
 
-      env.step(catch_swap.Action.LEFT)
+      env.step(dancing_catch.Action.LEFT)
       state = env.get_state()
 
       # Paddle x-position should have moved left by 1 unless at the edge.
@@ -95,7 +95,7 @@ class CatchSwapTest(parameterized.TestCase):
       current_state.paddle_x = paddle_x
       env.set_state(current_state)
 
-      env.step(catch_swap.Action.RIGHT)
+      env.step(dancing_catch.Action.RIGHT)
       state = env.get_state()
 
       # Paddle x-position should have moved right by 1 unless at the edge.
@@ -106,7 +106,7 @@ class CatchSwapTest(parameterized.TestCase):
       current_state.paddle_x = paddle_x
       env.set_state(current_state)
 
-      env.step(catch_swap.Action.STAY)
+      env.step(dancing_catch.Action.STAY)
       state = env.get_state()
       self.assertEqual(state.paddle_x, paddle_x)
 

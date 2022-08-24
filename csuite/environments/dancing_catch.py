@@ -15,7 +15,7 @@
 
 """Continuing catch environment with non-stationary permutations of the observation features.
 
-Environment description can be found in the `CatchSwap` environment class.
+Environment description can be found in the `DancingCatch` environment class.
 """
 import copy
 import dataclasses
@@ -96,7 +96,7 @@ class State:
   rng: np.random.RandomState
 
 
-class CatchSwap(base.Environment):
+class DancingCatch(base.Environment):
   """A continuing Catch environment with random swaps.
 
   This environment is the same as the continuing Catch environment, but
