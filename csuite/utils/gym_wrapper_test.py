@@ -17,7 +17,6 @@
 
 from absl.testing import absltest
 import csuite
-import gym
 from gym.utils import env_checker as gym_env_checker
 
 
@@ -29,6 +28,7 @@ class GymFromCSuiteTest(absltest.TestCase):
     # Gym's env_checker.check_env throws an exception if the env does not
     # conform to the Gym API:
     gym_env_checker.check_env(gym_env)
+
 
 if __name__ == '__main__':
   absltest.main()

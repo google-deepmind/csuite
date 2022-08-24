@@ -68,5 +68,6 @@ class PendulumTest(absltest.TestCase):
     self.assertLessEqual(abs(new_obs[0]), old_obs[0] + 0.01)
     self.assertLessEqual(abs(new_obs[1]), old_obs[1] + 0.01)
 
+
 if __name__ == '__main__':
   absltest.main()

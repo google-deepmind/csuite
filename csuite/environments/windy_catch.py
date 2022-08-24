@@ -189,8 +189,7 @@ class WindyCatch(base.Environment):
     wd = _WIND_DELTA[self._state.wind_direction.index(True)]
     self._state.balls = [
         # x coord: applies wind; y coord: gravity
-        ((x + wd) % self._params.columns, y + 1)
-        for x, y in self._state.balls
+        ((x + wd) % self._params.columns, y + 1) for x, y in self._state.balls
     ]
 
     # Since at most one ball is added at each timestep, at most one ball
@@ -204,8 +203,7 @@ class WindyCatch(base.Environment):
     # Add new ball with given probability.
     if self._state.rng.random() < self._params.spawn_probability:
       self._state.balls.append(
-          (self._state.rng.randint(self._params.columns), 0)
-      )
+          (self._state.rng.randint(self._params.columns), 0))
 
     # Update time since last change in wind.
     self._state.time_since_wind_change += 1

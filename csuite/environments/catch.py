@@ -35,8 +35,7 @@ _INVALID_PADDLE_POS = ("Invalid state: paddle should be positioned at the"
                        " bottom of the board.")
 _INVALID_BALLS_RANGE = (
     "Invalid state: positions of balls and paddle not in expected"
-    " row range [0, {rows}) and column range [0, {columns})."
-)
+    " row range [0, {rows}) and column range [0, {columns}).")
 
 # Default environment variables.
 _ROWS = 10
@@ -117,8 +116,8 @@ class Catch(base.Environment):
       seed: Seed for the internal random number generator.
     """
     self._seed = seed
-    self._params = Params(rows=rows, columns=columns,
-                          spawn_probability=spawn_probability)
+    self._params = Params(
+        rows=rows, columns=columns, spawn_probability=spawn_probability)
     self._state = None
 
   def start(self):
@@ -164,8 +163,8 @@ class Catch(base.Environment):
       raise ValueError(_INVALID_ACTION.format(action=action))
 
     # Move the paddle.
-    self._state.paddle_x = np.clip(self._state.paddle_x + Action(action).dx,
-                                   0, self._params.columns - 1)
+    self._state.paddle_x = np.clip(
+        self._state.paddle_x + Action(action).dx, 0, self._params.columns - 1)
 
     # Move all balls down by one unit.
     self._state.balls = [(x, y + 1) for x, y in self._state.balls]
@@ -181,8 +180,7 @@ class Catch(base.Environment):
     # Add new ball with given probability or if a ball was removed.
     if self._state.rng.random() < self._params.spawn_probability:
       self._state.balls.append(
-          (self._state.rng.randint(self._params.columns), 0)
-      )
+          (self._state.rng.randint(self._params.columns), 0))
 
     return self._get_observation(), reward
 
@@ -202,8 +200,12 @@ class Catch(base.Environment):
 
   def observation_spec(self):
     """Describes the observation specs of the environment."""
-    return specs.BoundedArray(shape=(self._params.rows, self._params.columns),
-                              dtype=int, minimum=0, maximum=1, name="board")
+    return specs.BoundedArray(
+        shape=(self._params.rows, self._params.columns),
+        dtype=int,
+        minimum=0,
+        maximum=1,
+        name="board")
 
   def action_spec(self):
     """Describes the action specs of the environment."""
@@ -220,14 +222,15 @@ class Catch(base.Environment):
       state: A State object which overrides the current state.
     """
     # Check that input state values are valid.
-    if  not (0 <= state.paddle_x < self._params.columns
-             and state.paddle_y == self._params.rows - 1):
+    if not (0 <= state.paddle_x < self._params.columns and
+            state.paddle_y == self._params.rows - 1):
       raise ValueError(_INVALID_PADDLE_POS)
 
     for x, y in state.balls:
       if not (0 <= x < self._params.columns and 0 <= y < self._params.rows):
-        raise ValueError(_INVALID_BALLS_RANGE.format(
-            rows=self._params.rows, columns=self._params.columns))
+        raise ValueError(
+            _INVALID_BALLS_RANGE.format(
+                rows=self._params.rows, columns=self._params.columns))
 
     self._state = copy.deepcopy(state)
 

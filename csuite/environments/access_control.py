@@ -57,7 +57,7 @@ class Params:
     num_servers: A positive integer, denoting the total number of available
       servers.
     free_probability: A positive float, denoting the probability a busy server
-     becomes free at each timestep.
+      becomes free at each timestep.
     priorities: A list of floats, giving the possible priorities of incoming
       customers.
   """
@@ -123,15 +123,15 @@ class AccessControl(base.Environment):
     self._params = Params(
         num_servers=num_servers,
         free_probability=free_probability,
-        priorities=priorities
-    )
-    self.num_states = ((self._params.num_servers + 1)
-                       * len(self._params.priorities))
+        priorities=priorities)
+    self.num_states = ((self._params.num_servers + 1) *
+                       len(self._params.priorities))
 
     # Populate lookup table for observations.
     self.lookup_table = {}
-    for idx, state in enumerate(itertools.product(
-        range(self._params.num_servers + 1), self._params.priorities)):
+    for idx, state in enumerate(
+        itertools.product(
+            range(self._params.num_servers + 1), self._params.priorities)):
       self.lookup_table[state] = idx
 
     self._state = None
@@ -142,8 +142,7 @@ class AccessControl(base.Environment):
     self._state = State(
         num_busy_servers=0,
         incoming_priority=rng.choice(self._params.priorities),
-        rng=rng
-    )
+        rng=rng)
     return self._get_observation()
 
   @property
@@ -185,9 +184,7 @@ class AccessControl(base.Environment):
     # Update internal state by freeing busy servers with a given probability.
     num_busy_servers = self._state.num_busy_servers
     num_new_free_servers = self._state.rng.binomial(
-        num_busy_servers,
-        p=self._params.free_probability
-    )
+        num_busy_servers, p=self._params.free_probability)
     self._state.num_busy_servers = num_busy_servers - num_new_free_servers
     self._state.incoming_priority = new_priority
 
@@ -205,8 +202,7 @@ class AccessControl(base.Environment):
 
   def observation_spec(self):
     """Describes the observation specs of the environment."""
-    return specs.DiscreteArray(self.num_states, dtype=int,
-                               name="observation")
+    return specs.DiscreteArray(self.num_states, dtype=int, name="observation")
 
   def action_spec(self):
     """Describes the action specs of the environment."""

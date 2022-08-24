@@ -29,4 +29,3 @@ class DMEnvFromCSuiteTest(test_utils.EnvironmentTestMixin, absltest.TestCase):
 
 if __name__ == '__main__':
   absltest.main()
-

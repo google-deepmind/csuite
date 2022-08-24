@@ -104,8 +104,8 @@ _LINE_WIDTH_THICK = _PIXELS_PER_SQ // 10
 # Dictionary mapping the four colored squares to their rectangle bounding boxes
 # used for visualization, with keys 0 (Red), 1 (Green), 2 (Yellow), 3 (Blue).
 _BOUNDING_BOXES = {
-    idx: [(_PIXELS_PER_SQ * (x+1), _PIXELS_PER_SQ * (y+1)),
-          (_PIXELS_PER_SQ * (x+2), _PIXELS_PER_SQ * (y+2))]
+    idx: [(_PIXELS_PER_SQ * (x + 1), _PIXELS_PER_SQ * (y + 1)),
+          (_PIXELS_PER_SQ * (x + 2), _PIXELS_PER_SQ * (y + 2))]
     for idx, (x, y) in _COLOR_POSITIONS.items()
 }
 
@@ -202,11 +202,10 @@ class Taxi(base.Environment):
 
     # Populate lookup table for observations.
     self.lookup_table = {}
-    for idx, state in enumerate(itertools.product(
-        range(_NUM_ROWS),
-        range(_NUM_COLUMNS),
-        range(_NUM_POSITIONS),
-        range(_NUM_DEST))):
+    for idx, state in enumerate(
+        itertools.product(
+            range(_NUM_ROWS), range(_NUM_COLUMNS), range(_NUM_POSITIONS),
+            range(_NUM_DEST))):
       self.lookup_table[state] = idx
 
   def start(self):
@@ -232,7 +231,7 @@ class Taxi(base.Environment):
 
     Args:
       action: An integer in [0,5] indicating whether the taxi moves, picks up
-      the passenger, or drops off the passenger.
+        the passenger, or drops off the passenger.
 
     Returns:
       A tuple of type (int, float) giving the next observation and the reward.
@@ -251,8 +250,8 @@ class Taxi(base.Environment):
 
     reward = 0
     # Move taxi according to the action.
-    self._state.taxi_y = np.clip(self._state.taxi_y + Action(action).dy,
-                                 0, _NUM_ROWS - 1)
+    self._state.taxi_y = np.clip(self._state.taxi_y + Action(action).dy, 0,
+                                 _NUM_ROWS - 1)
     # If moving East or West, check that the taxi does not hit a barrier.
     if action in [Action.EAST, Action.WEST]:
       move = ((self._state.taxi_x, self._state.taxi_y),
@@ -260,8 +259,8 @@ class Taxi(base.Environment):
       if action == Action.WEST:  # Need to reverse the tuple.
         move = move[::-1]
       if move not in _BLOCKED_TUPLE:
-        self._state.taxi_x = np.clip(self._state.taxi_x + Action(action).dx,
-                                     0, _NUM_COLUMNS - 1)
+        self._state.taxi_x = np.clip(self._state.taxi_x + Action(action).dx, 0,
+                                     _NUM_COLUMNS - 1)
 
     # If action is pickup, check if passenger location matches current location.
     if action == Action.PICKUP:
@@ -280,8 +279,8 @@ class Taxi(base.Environment):
     # desired destination matches current location.
     if action == Action.DROPOFF:
       dest_coordinates = _COLOR_POSITIONS[self._state.destination]
-      if (self._state.passenger_loc != 4 or
-          dest_coordinates != (self._state.taxi_x, self._state.taxi_y)):
+      if (self._state.passenger_loc != 4 or dest_coordinates !=
+          (self._state.taxi_x, self._state.taxi_y)):
         reward = -10
       else:
         reward = 20
@@ -293,18 +292,13 @@ class Taxi(base.Environment):
 
   def _get_observation(self):
     """Returns a observation index uniquely identifying the current state."""
-    state_tuple = (
-        self._state.taxi_x,
-        self._state.taxi_y,
-        self._state.passenger_loc,
-        self._state.destination
-    )
+    state_tuple = (self._state.taxi_x, self._state.taxi_y,
+                   self._state.passenger_loc, self._state.destination)
     return self.lookup_table[state_tuple]
 
   def observation_spec(self):
     """Describes the observation specs of the environment."""
-    return specs.DiscreteArray(_NUM_STATES, dtype=int,
-                               name="observation")
+    return specs.DiscreteArray(_NUM_STATES, dtype=int, name="observation")
 
   def action_spec(self):
     """Describes the action specs of the environment."""
@@ -358,42 +352,47 @@ class Taxi(base.Environment):
 
     # Draw basic grid.
     for row in range(1, _NUM_ROWS + 2):  # horizontal grid lines.
-      line_coordinates = [
-          (_PIXELS_PER_SQ, _PIXELS_PER_SQ * row),
-          (_PIXELS_PER_SQ * (_NUM_ROWS + 1), _PIXELS_PER_SQ * row)
-      ]
+      line_coordinates = [(_PIXELS_PER_SQ, _PIXELS_PER_SQ * row),
+                          (_PIXELS_PER_SQ * (_NUM_ROWS + 1),
+                           _PIXELS_PER_SQ * row)]
       dct.line(line_coordinates, fill="black", width=_LINE_WIDTH_THIN)
     for col in range(1, _NUM_COLUMNS + 2):  # vertical grid lines.
-      line_coordinates = [
-          (_PIXELS_PER_SQ * col, _PIXELS_PER_SQ),
-          (_PIXELS_PER_SQ * col, _PIXELS_PER_SQ * (_NUM_ROWS + 1))
-      ]
+      line_coordinates = [(_PIXELS_PER_SQ * col, _PIXELS_PER_SQ),
+                          (_PIXELS_PER_SQ * col,
+                           _PIXELS_PER_SQ * (_NUM_ROWS + 1))]
       dct.line(line_coordinates, fill="black", width=_LINE_WIDTH_THIN)
 
     # Draw barriers.
-    dct.rectangle(_BORDER,  # Grid perimeter.
-                  outline="black",
-                  width=_LINE_WIDTH_THICK)
+    dct.rectangle(
+        _BORDER,  # Grid perimeter.
+        outline="black",
+        width=_LINE_WIDTH_THICK)
+
     def get_barrier_coordinates(x, y):
       """Returns bounding box for barrier (length two down from input)."""
       return [(x, y), (x, y + 2 * _PIXELS_PER_SQ)]
+
     # Top barrier, bottom left barrier, bottom right barrier.
-    dct.line(get_barrier_coordinates(3 * _PIXELS_PER_SQ, _PIXELS_PER_SQ),
-             fill="black",
-             width=_LINE_WIDTH_THICK)
-    dct.line(get_barrier_coordinates(2 * _PIXELS_PER_SQ, 4 * _PIXELS_PER_SQ),
-             fill="black",
-             width=_LINE_WIDTH_THICK)
-    dct.line(get_barrier_coordinates(4 * _PIXELS_PER_SQ, 4 * _PIXELS_PER_SQ),
-             fill="black",
-             width=_LINE_WIDTH_THICK)
+    dct.line(
+        get_barrier_coordinates(3 * _PIXELS_PER_SQ, _PIXELS_PER_SQ),
+        fill="black",
+        width=_LINE_WIDTH_THICK)
+    dct.line(
+        get_barrier_coordinates(2 * _PIXELS_PER_SQ, 4 * _PIXELS_PER_SQ),
+        fill="black",
+        width=_LINE_WIDTH_THICK)
+    dct.line(
+        get_barrier_coordinates(4 * _PIXELS_PER_SQ, 4 * _PIXELS_PER_SQ),
+        fill="black",
+        width=_LINE_WIDTH_THICK)
 
     # Draw passenger location.
     if self._state.passenger_loc in range(4):
       taxi_color = _EMPTY_TAXI_HEX
-      dct.rectangle(_BOUNDING_BOXES[self._state.passenger_loc],
-                    outline=_PASS_LOC_HEX,
-                    width=_LINE_WIDTH_THICK)
+      dct.rectangle(
+          _BOUNDING_BOXES[self._state.passenger_loc],
+          outline=_PASS_LOC_HEX,
+          width=_LINE_WIDTH_THICK)
     else:
       taxi_color = _PASS_LOC_HEX
 
@@ -403,11 +402,14 @@ class Taxi(base.Environment):
                (y + 1) * _PIXELS_PER_SQ + _OFFSET),
               ((x + 2) * _PIXELS_PER_SQ - _OFFSET,
                (y + 2) * _PIXELS_PER_SQ - _OFFSET)]
-    dct.ellipse(get_circle_coordinates(self._state.taxi_x, self._state.taxi_y),
-                fill=taxi_color)
+
+    dct.ellipse(
+        get_circle_coordinates(self._state.taxi_x, self._state.taxi_y),
+        fill=taxi_color)
 
     # Draw self._state.destination location.
-    dct.rectangle(_BOUNDING_BOXES[self._state.destination],
-                  outline=_DEST_HEX,
-                  width=_LINE_WIDTH_THICK)
+    dct.rectangle(
+        _BOUNDING_BOXES[self._state.destination],
+        outline=_DEST_HEX,
+        width=_LINE_WIDTH_THICK)
     return np.asarray(image, dtype=np.uint8)

@@ -34,8 +34,7 @@ _INVALID_PADDLE_POS = ("Invalid state: paddle should be positioned at the"
                        " bottom of the board.")
 _INVALID_BALLS_RANGE = (
     "Invalid state: positions of balls and paddle not in expected"
-    " row range [0, {rows}) and column range [0, {columns})."
-)
+    " row range [0, {rows}) and column range [0, {columns}).")
 
 # Default environment variables.
 _ROWS = 10
@@ -83,8 +82,8 @@ class State:
     balls: A list of (x, y) coordinates representing the present balls.
     shuffle_idx: Indices for performing the observation shuffle as a result of
       the random swaps.
-    time_since_swap: An integer denoting how many timesteps have elapsed
-      since the last swap.
+    time_since_swap: An integer denoting how many timesteps have elapsed since
+      the last swap.
     rng: Internal NumPy pseudo-random number generator, included here for
       reproducibility purposes.
   """
@@ -124,11 +123,12 @@ class DancingCatch(base.Environment):
         the observation occurs.
     """
     self._seed = seed
-    self._params = Params(rows=rows,
-                          columns=columns,
-                          observation_dim=rows * columns,
-                          spawn_probability=spawn_probability,
-                          swap_every=swap_every)
+    self._params = Params(
+        rows=rows,
+        columns=columns,
+        observation_dim=rows * columns,
+        spawn_probability=spawn_probability,
+        swap_every=swap_every)
     self._state = None
 
   def start(self):
@@ -176,8 +176,8 @@ class DancingCatch(base.Environment):
       raise ValueError(_INVALID_ACTION.format(action=action))
 
     # Move the paddle.
-    self._state.paddle_x = np.clip(self._state.paddle_x + Action(action).dx,
-                                   0, self._params.columns - 1)
+    self._state.paddle_x = np.clip(self._state.paddle_x + Action(action).dx, 0,
+                                   self._params.columns - 1)
 
     # Move all balls down by one unit.
     self._state.balls = [(x, y + 1) for x, y in self._state.balls]
@@ -193,8 +193,7 @@ class DancingCatch(base.Environment):
     # Add new ball with given probability.
     if self._state.rng.random() < self._params.spawn_probability:
       self._state.balls.append(
-          (self._state.rng.randint(self._params.columns), 0)
-      )
+          (self._state.rng.randint(self._params.columns), 0))
 
     # Update time since last swap.
     self._state.time_since_swap += 1
@@ -202,11 +201,10 @@ class DancingCatch(base.Environment):
     # Update the observation permutation indices by swapping two indices,
     # at the given interval.
     if self._state.time_since_swap % self._params.swap_every == 0:
-      idx_1, idx_2 = self._state.rng.randint(self._params.observation_dim,
-                                             size=2).T
+      idx_1, idx_2 = self._state.rng.randint(
+          self._params.observation_dim, size=2).T
       self._state.shuffle_idx[[idx_1, idx_2]] = (
-          self._state.shuffle_idx[[idx_2, idx_1]]
-      )
+          self._state.shuffle_idx[[idx_2, idx_1]])
       self._state.time_since_swap = 0
 
     return self._get_observation(), reward
@@ -228,8 +226,12 @@ class DancingCatch(base.Environment):
 
   def observation_spec(self):
     """Describes the observation specs of the environment."""
-    return specs.BoundedArray(shape=(self._params.observation_dim,),
-                              dtype=int, minimum=0, maximum=1, name="board")
+    return specs.BoundedArray(
+        shape=(self._params.observation_dim,),
+        dtype=int,
+        minimum=0,
+        maximum=1,
+        name="board")
 
   def action_spec(self):
     """Describes the action specs of the environment."""
@@ -246,14 +248,15 @@ class DancingCatch(base.Environment):
       state: A State object which overrides the current state.
     """
     # Check that input state values are valid.
-    if  not (0 <= state.paddle_x < self._params.columns
-             and state.paddle_y == self._params.rows - 1):
+    if not (0 <= state.paddle_x < self._params.columns and
+            state.paddle_y == self._params.rows - 1):
       raise ValueError(_INVALID_PADDLE_POS)
 
     for x, y in state.balls:
       if not (0 <= x < self._params.columns and 0 <= y < self._params.rows):
-        raise ValueError(_INVALID_BALLS_RANGE.format(
-            rows=self._params.rows, columns=self._params.columns))
+        raise ValueError(
+            _INVALID_BALLS_RANGE.format(
+                rows=self._params.rows, columns=self._params.columns))
 
     self._state = copy.deepcopy(state)
 

@@ -16,7 +16,7 @@
 """Wrapper for adapating a csuite base.Environment to OpenAI gym interface."""
 
 import typing
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Tuple, Union
 
 from csuite.environments import base
 from dm_env import specs
@@ -68,9 +68,9 @@ class GymFromCSuite(gym.Env):
       return spaces.Discrete(action_spec.num_values)
     else:
       raise NotImplementedError(
-          "The gym wrapper only supports environments with discrete action "
-          "spaces. Please raise an issue if you want to work with a "
-          "a non-discrete action space.")
+          'The gym wrapper only supports environments with discrete action '
+          'spaces. Please raise an issue if you want to work with a '
+          'a non-discrete action space.')
 
   @property
   def observation_space(self) -> spaces.Box:

@@ -45,14 +45,11 @@ class TaxiTest(parameterized.TestCase):
       self.assertIn(state.passenger_loc, range(4))
       self.assertIn(state.destination, range(4))
 
-  @parameterized.parameters((2, 2, taxi.Action.NORTH, True),
-                            (2, 0, taxi.Action.NORTH, False),
-                            (2, 2, taxi.Action.SOUTH, True),
-                            (2, 4, taxi.Action.SOUTH, False),
-                            (1, 4, taxi.Action.EAST, True),
-                            (1, 1, taxi.Action.EAST, False),
-                            (2, 4, taxi.Action.WEST, True),
-                            (2, 1, taxi.Action.WEST, False))
+  @parameterized.parameters(
+      (2, 2, taxi.Action.NORTH, True), (2, 0, taxi.Action.NORTH, False),
+      (2, 2, taxi.Action.SOUTH, True), (2, 4, taxi.Action.SOUTH, False),
+      (1, 4, taxi.Action.EAST, True), (1, 1, taxi.Action.EAST, False),
+      (2, 4, taxi.Action.WEST, True), (2, 1, taxi.Action.WEST, False))
   def test_one_movement_step(self, x, y, action, can_move):
     """Tests one step with a movement action (North, East, South, West)."""
     env = taxi.Taxi()
@@ -142,6 +139,7 @@ class TaxiTest(parameterized.TestCase):
     # Drop off the passenger.
     _, reward = env.step(taxi.Action.DROPOFF)
     self.assertEqual(reward, 20)
+
 
 if __name__ == '__main__':
   absltest.main()

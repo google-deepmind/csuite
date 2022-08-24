@@ -30,7 +30,6 @@ import numpy as np
 from PIL import Image
 from PIL import ImageDraw
 
-
 # Default environment variables.
 _NUM_ACTIONS = 3  # Size of action space discretization.
 _FRICTION = 0.1
@@ -80,8 +79,8 @@ class State:
   """State of a continuing pendulum environment.
 
   Attributes:
-    angle: a float in [0, 2*pi] giving the angle in radians of the pendulum.
-      An angle of 0 indicates that the pendulum is hanging downwards.
+    angle: a float in [0, 2*pi] giving the angle in radians of the pendulum. An
+      angle of 0 indicates that the pendulum is hanging downwards.
     velocity: a float in [-max_speed, max_speed] giving the angular velocity.
   """
   angle: float
@@ -122,8 +121,8 @@ def sparse_reward(state: State,
     a reward of 0 otherwise.
   """
   reward_angle_radians = reward_angle * _RADIAN_MULTIPLIER
-  if (np.pi - reward_angle_radians < state.angle
-      < np.pi + reward_angle_radians):
+  if (np.pi - reward_angle_radians < state.angle <
+      np.pi + reward_angle_radians):
     return 1.
   else:
     return 0.
@@ -152,7 +151,7 @@ def dense_reward(state: State, torque: float, stepsize: float) -> float:
   Returns:
     A float giving the dense reward.
   """
-  return -((state.angle - np.pi) ** 2 + torque ** 2) * stepsize
+  return -((state.angle - np.pi)**2 + torque**2) * stepsize
 
 
 def _alias_angle(angle: float) -> float:
@@ -208,8 +207,8 @@ class Pendulum(base.Environment):
       simulation_step_size: The step size (in seconds) of the simulation.
       act_step_period: An integer giving the number of simulation steps for each
         action input.
-      max_speed: A float giving the maximum speed (in radians/second) allowed
-        in the simulation.
+      max_speed: A float giving the maximum speed (in radians/second) allowed in
+        the simulation.
       reward_fn: A callable which returns a float reward given current state.
       seed: Seed for the internal random number generator.
     """
@@ -239,8 +238,8 @@ class Pendulum(base.Environment):
     """Updates the environment state and returns an observation and reward.
 
     Args:
-      action: An integer in {0, 1, 2} indicating whether to subtract one unit
-        of torque, do nothing, or add one unit of torque.
+      action: An integer in {0, 1, 2} indicating whether to subtract one unit of
+        torque, do nothing, or add one unit of torque.
 
     Returns:
       A tuple giving the next observation in the form of a NumPy array
@@ -260,12 +259,9 @@ class Pendulum(base.Environment):
     new_velocity = self._state.velocity
 
     for _ in range(self._params.act_step_period):
-      new_velocity += (
-          (self._torque  -
-           self._params.friction * new_velocity -
-           self._params.gravity * np.sin(new_angle))
-          * self._params.simulation_step_size
-      )
+      new_velocity += ((self._torque - self._params.friction * new_velocity -
+                        self._params.gravity * np.sin(new_angle)) *
+                       self._params.simulation_step_size)
       new_angle += new_velocity * self._params.simulation_step_size
 
     # Ensure the angle is between 0 and 2*pi.
@@ -276,16 +272,15 @@ class Pendulum(base.Environment):
                            self._params.max_speed)
 
     self._state = State(angle=new_angle, velocity=new_velocity)
-    return (
-        np.array([self._state.angle, self._state.velocity], dtype=np.float32),
-        self._params.reward_fn(self._state,
-                               self._torque,
-                               self._params.simulation_step_size)
-    )
+    return (np.array([self._state.angle, self._state.velocity],
+                     dtype=np.float32),
+            self._params.reward_fn(self._state, self._torque,
+                                   self._params.simulation_step_size))
 
   def observation_spec(self):
     """Describes the observation specs of the environment."""
-    return specs.BoundedArray((2,), dtype=np.float32,
+    return specs.BoundedArray((2,),
+                              dtype=np.float32,
                               minimum=[0, -self._params.max_speed],
                               maximum=[2 * np.pi, self._params.max_speed])
 
@@ -328,14 +323,14 @@ class Pendulum(base.Environment):
 
     # Draw reward range region.
     boundary_x = _CENTER_IMAGE * (1 - _SCALE_FACTOR)
-    pendulum_bounding_box = [
-        (boundary_x, boundary_x),
-        (_IMAGE_SIZE - boundary_x, _IMAGE_SIZE - boundary_x)
-    ]
-    dct.pieslice(pendulum_bounding_box,
-                 start=(270 - _REWARD_ANGLE),
-                 end=(270 + _REWARD_ANGLE),
-                 fill=_LIGHT_GREEN)
+    pendulum_bounding_box = [(boundary_x, boundary_x),
+                             (_IMAGE_SIZE - boundary_x,
+                              _IMAGE_SIZE - boundary_x)]
+    dct.pieslice(
+        pendulum_bounding_box,
+        start=(270 - _REWARD_ANGLE),
+        end=(270 + _REWARD_ANGLE),
+        fill=_LIGHT_GREEN)
 
     # Get absolute coordinates of the pendulum tip.
     tip_coords = abs_coordinates(x_pos, y_pos)
@@ -351,27 +346,35 @@ class Pendulum(base.Environment):
 
     # Draw torque arrow.
     if self._torque > 0:
-      dct.arc(pendulum_bounding_box,
-              start=360 - _TORQUE_ANGLE, end=_TORQUE_ANGLE,
-              fill="blue", width=_ARROW_WIDTH)
+      dct.arc(
+          pendulum_bounding_box,
+          start=360 - _TORQUE_ANGLE,
+          end=_TORQUE_ANGLE,
+          fill="blue",
+          width=_ARROW_WIDTH)
       # Draw arrow heads.
       arrow_x, arrow_y = abs_coordinates(
           np.cos(_TORQUE_ANGLE * _RADIAN_MULTIPLIER),
-          -np.sin(_TORQUE_ANGLE * _RADIAN_MULTIPLIER)
-      )
+          -np.sin(_TORQUE_ANGLE * _RADIAN_MULTIPLIER))
       dct.regular_polygon((arrow_x, arrow_y, _ARROW_WIDTH * 1.5),
-                          n_sides=3, rotation=_TORQUE_ANGLE, fill="blue")
+                          n_sides=3,
+                          rotation=_TORQUE_ANGLE,
+                          fill="blue")
 
     elif self._torque < 0:
-      dct.arc(pendulum_bounding_box,
-              start=180 - _TORQUE_ANGLE, end=180 + _TORQUE_ANGLE,
-              fill="blue", width=_ARROW_WIDTH)
+      dct.arc(
+          pendulum_bounding_box,
+          start=180 - _TORQUE_ANGLE,
+          end=180 + _TORQUE_ANGLE,
+          fill="blue",
+          width=_ARROW_WIDTH)
       # Draw arrow heads.
       arrow_x, arrow_y = abs_coordinates(
           -np.cos(_TORQUE_ANGLE * _RADIAN_MULTIPLIER),
-          -np.sin(_TORQUE_ANGLE * _RADIAN_MULTIPLIER)
-      )
+          -np.sin(_TORQUE_ANGLE * _RADIAN_MULTIPLIER))
       dct.regular_polygon((arrow_x, arrow_y, _ARROW_WIDTH * 1.5),
-                          n_sides=3, rotation=-_TORQUE_ANGLE, fill="blue")
+                          n_sides=3,
+                          rotation=-_TORQUE_ANGLE,
+                          fill="blue")
 
     return np.asarray(image, dtype=np.uint8)

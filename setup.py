@@ -21,7 +21,6 @@ from setuptools import setup
 
 _CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-
 setup(
     name='csuite',
     version='0.1.0',
