@@ -43,8 +43,6 @@ _REWARD_ANGLE = 30
 _RADIAN_MULTIPLIER = np.pi / 180
 
 # Error messages.
-_STEP_WITHOUT_START = ("Environment state has not been initialized."
-                       "`start` must be called before calling `step`.")
 _INVALID_ANGLE = ("Invalid state: expected angle to be in range [0, 2pi].")
 
 # Variables for pixel visualization of the environment.
@@ -250,7 +248,7 @@ class Pendulum(base.Environment):
     """
     # Check if state has been initialized.
     if not self.started:
-      raise RuntimeError(_STEP_WITHOUT_START)
+      raise RuntimeError(base.STEP_WITHOUT_START_ERR)
 
     self._torque = Action(action).tau
 

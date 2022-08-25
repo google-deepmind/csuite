@@ -27,8 +27,6 @@ from dm_env import specs
 import numpy as np
 
 # Error messages.
-_STEP_WITHOUT_START = ("Environment state has not been initialized. `start`"
-                       " must be called before calling `step`.")
 _INVALID_ACTION = "Invalid action: expected 0, 1, or 2 but received {action}."
 _INVALID_PADDLE_POS = ("Invalid state: paddle should be positioned at the"
                        " bottom of the board.")
@@ -175,7 +173,7 @@ class WindyCatch(base.Environment):
     """
     # Check if state has been initialized.
     if not self.started:
-      raise RuntimeError(_STEP_WITHOUT_START)
+      raise RuntimeError(base.STEP_WITHOUT_START_ERR)
 
     # Check if input action is valid.
     if action not in [Action.LEFT, Action.STAY, Action.RIGHT]:

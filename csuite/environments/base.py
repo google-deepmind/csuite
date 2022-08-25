@@ -21,6 +21,11 @@ from typing import Any, Tuple
 from dm_env import specs
 
 
+# TODO(b/243715530): The base environment should implementing this check.
+STEP_WITHOUT_START_ERR = ("Environment state has not been initialized. `start`"
+                          " must be called before calling `step`.")
+
+
 class Environment(abc.ABC):
   """Base class for continuing environments.
 

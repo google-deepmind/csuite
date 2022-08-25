@@ -52,8 +52,6 @@ _NUM_STATES = _NUM_ROWS * _NUM_COLUMNS * _NUM_POSITIONS * _NUM_DEST
 _NUM_ACTIONS = 6
 
 # Error messages.
-_STEP_WITHOUT_START = ("Environment state has not been initialized. `start`"
-                       "must be called before calling `step`.")
 _INVALID_ACTION = "Invalid action: expected value in [0,5] but received {}."
 _INVALID_TAXI_LOC = "Invalid state: expected taxi coordinates in range [0,4]."
 _INVALID_PASS_LOC = ("Invalid state: expected passenger location as an integer"
@@ -242,7 +240,7 @@ class Taxi(base.Environment):
     """
     # Check if state has been initialized.
     if not self.started:
-      raise RuntimeError(_STEP_WITHOUT_START)
+      raise RuntimeError(base.STEP_WITHOUT_START_ERR)
 
     # Check if input action is valid.
     if action not in [a.value for a in Action]:

@@ -35,8 +35,6 @@ _FREE_PROBABILITY = 0.06
 _PRIORITIES = (1, 2, 4, 8)
 
 # Error messages.
-_STEP_WITHOUT_START = ("Environment state has not been initialized."
-                       "`start` must be called before calling `step`.")
 _INVALID_ACTION = "Invalid action: expected 0 or 1 but received {action}."
 _INVALID_BUSY_SERVERS = ("Invalid state: num_busy_servers not in expected"
                          "range [0, {}).")
@@ -166,7 +164,7 @@ class AccessControl(base.Environment):
     """
     # Check if state has been initialized.
     if not self.started:
-      raise RuntimeError(_STEP_WITHOUT_START)
+      raise RuntimeError(base.STEP_WITHOUT_START_ERR)
 
     # Check if input action is valid.
     if action not in [Action.REJECT, Action.ACCEPT]:
