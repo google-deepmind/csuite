@@ -39,7 +39,13 @@ class GymFromCSuite(gym.Env):
 
   def step(self, action) -> _GymTimestep:
     # Convert the csuite step result to a gym timestep.
-    observation, reward = self._csuite_env.step(action)
+    try:
+      observation, reward = self._csuite_env.step(action)
+    except RuntimeError as e:
+      # The gym.utils.env_checker expects the following assertion.
+      if str(e) == base.STEP_WITHOUT_START_ERR:
+        assert False, 'Cannot call env.step() before calling reset()'
+
     return observation, reward, False, {}
 
   def reset(self) -> np.ndarray:
