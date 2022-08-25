@@ -12,3 +12,4 @@ with no natural episode boundaries.
    environments/access_control
    environments/catch
    environments/pendulum
+   environments/taxi
