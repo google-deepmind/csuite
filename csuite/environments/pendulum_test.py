@@ -37,9 +37,11 @@ class PendulumTest(absltest.TestCase):
 
     with self.subTest(name='start_state'):
       start_obs = env.start()
-      # Initial angle and velocity should be 0.
-      self.assertEqual(start_obs[0], 0.)
+      # Initial cosine of the angle should be 1.
+      # Initial sine of the angle and initial velocity should be 0.
+      self.assertEqual(start_obs[0], 1.)
       self.assertEqual(start_obs[1], 0.)
+      self.assertEqual(start_obs[2], 0.)
 
   def test_one_step(self):
     """Tests one environment step."""
@@ -65,8 +67,9 @@ class PendulumTest(absltest.TestCase):
       new_obs, _ = env.step(pendulum.Action.POSITIVE)
 
     # If the solver was properly updated, the two observations are the same.
-    self.assertLessEqual(abs(new_obs[0]), old_obs[0] + 0.01)
-    self.assertLessEqual(abs(new_obs[1]), old_obs[1] + 0.01)
+    self.assertLessEqual(abs(new_obs[0]), old_obs[0])
+    self.assertLessEqual(abs(new_obs[1]), old_obs[1])
+    self.assertLessEqual(abs(new_obs[2]), old_obs[2])
 
 
 if __name__ == '__main__':

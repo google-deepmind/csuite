@@ -126,38 +126,11 @@ def sparse_reward(state: State,
     return 0.
 
 
-# Dense reward implemented from Atkeson and Santamaria (1997).
-# TODO(b/240199026): Decide whether we want to include dense reward.
-def dense_reward(state: State, torque: float, stepsize: float) -> float:
-  """Returns a dense reward for the continuing pendulum problem.
-
-  As defined in "A Comparison of Direct and Model-Based Reinforcement
-  Learning" (Atkeson & Santamaria, 1997), the reward is calculated as
-  ```
-    -((theta - pi) ^ 2 + torque ^ 2) * stepsize,
-  ```
-  where the theta is the angle in [0, 2pi], torque is the torque currently
-  being applied, and stepsize is the current integration stepsize. The maximum
-  reward achievable is 0 (when the pendulum is upright with zero torque applied)
-  and the minimum reward achievable is -(pi^2 + 1) * 0.05 = -0.54348...
-
-  Args:
-    state: A State object containing the current angle and velocity.
-    torque: A float giving the current motor torque.
-    stepsize: A float giving the integration time step.
-
-  Returns:
-    A float giving the dense reward.
-  """
-  return -((state.angle - np.pi)**2 + torque**2) * stepsize
-
-
 def _alias_angle(angle: float) -> float:
   """Returns an angle between 0 and 2*pi."""
   return angle % (2 * np.pi)
 
 
-# TODO(b/240199204): Update docstring with different versions of pendulum.
 class Pendulum(base.Environment):
   """A continuing pendulum environment.
 
@@ -168,9 +141,11 @@ class Pendulum(base.Environment):
   Direct and Model-Based Reinforcement Learning" (Atkeson & Santamaria, 1997).
   The key differences are the following:
   1) This environment is now continuing, i.e. the "trial length" is infinite.
-  2) There are only three discrete actions (apply a torque of -1, apply a torque
+  2) Instead of directly returning the angle of the pendulum in the observation,
+  this environment returns the cosine and sine of the angle.
+  3) There are only three discrete actions (apply a torque of -1, apply a torque
   of +1, and apply no-op) as opposed to a continuous torque value.
-  3) The default reward function is implemented as a sparse reward, i.e. there
+  4) The default reward function is implemented as a sparse reward, i.e. there
   is only a reward of 1 attained when the angle is in the region specified by
   the interval (pi - reward_angle, pi + reward_angle).
 
@@ -182,8 +157,8 @@ class Pendulum(base.Environment):
   where theta is the angle, mu is the friction coefficient, tau is the torque,
   and g is the acceleration due to gravity.
 
-  Observations are NumPy arrays of the form of (angle, velocity) where angle
-  is in [0, 2*pi] and velocity is in [-max_speed, max_speed].
+  Observations are NumPy arrays of the form [cos(angle), sin(angle), velocity]
+  where angle is in [0, 2*pi] and velocity is in [-max_speed, max_speed].
   """
 
   def __init__(self,
@@ -224,7 +199,10 @@ class Pendulum(base.Environment):
   def start(self):
     """Initializes the environment and returns an initial observation."""
     self._state = self._params.start_state_fn()
-    return np.array([self._state.angle, self._state.velocity], dtype=np.float32)
+    return np.array((np.cos(self._state.angle),
+                     np.sin(self._state.angle),
+                     self._state.velocity),
+                    dtype=np.float32)
 
   @property
   def started(self):
@@ -270,17 +248,19 @@ class Pendulum(base.Environment):
                            self._params.max_speed)
 
     self._state = State(angle=new_angle, velocity=new_velocity)
-    return (np.array([self._state.angle, self._state.velocity],
+    return (np.array((np.cos(self._state.angle),
+                      np.sin(self._state.angle),
+                      self._state.velocity),
                      dtype=np.float32),
             self._params.reward_fn(self._state, self._torque,
                                    self._params.simulation_step_size))
 
   def observation_spec(self):
     """Describes the observation specs of the environment."""
-    return specs.BoundedArray((2,),
+    return specs.BoundedArray((3,),
                               dtype=np.float32,
-                              minimum=[0, -self._params.max_speed],
-                              maximum=[2 * np.pi, self._params.max_speed])
+                              minimum=[-1, -1, -self._params.max_speed],
+                              maximum=[1, 1, self._params.max_speed])
 
   def action_spec(self):
     """Describes the action specs of the environment."""
@@ -305,7 +285,10 @@ class Pendulum(base.Environment):
 
     self._state = copy.deepcopy(state)
 
-    return np.array([self._state.angle, self._state.velocity])
+    return np.array((np.cos(self._state.angle),
+                     np.sin(self._state.angle),
+                     self._state.velocity),
+                    dtype=np.float32)
 
   def render(self):
     image = Image.new("RGB", (_IMAGE_SIZE, _IMAGE_SIZE), "white")
