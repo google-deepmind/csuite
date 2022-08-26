@@ -24,6 +24,7 @@ from csuite.environments import dancing_catch
 from csuite.environments import pendulum
 from csuite.environments import taxi
 from csuite.environments import windy_catch
+from csuite.environments.base import Environment
 from csuite.utils import dm_env_wrapper
 from csuite.utils import gym_wrapper
 

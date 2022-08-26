@@ -6,6 +6,12 @@ continuing — the agent-environment interaction goes on forever without limit,
 with no natural episode boundaries.
 
 
+.. toctree:: :caption: User Guide
+   :maxdepth: 1
+
+   api
+
+
 .. toctree:: :caption: Environments
    :maxdepth: 1
 
