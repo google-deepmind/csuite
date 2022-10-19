@@ -34,6 +34,7 @@ import copy
 import dataclasses
 import enum
 import itertools
+from typing import Optional
 
 from csuite.environments import base
 from dm_env import specs
@@ -206,9 +207,9 @@ class Taxi(base.Environment):
             range(_NUM_DEST))):
       self.lookup_table[state] = idx
 
-  def start(self):
+  def start(self, seed: Optional[int] = None):
     """Initializes the environment and returns an initial observation."""
-    rng = np.random.RandomState(self._seed)
+    rng = np.random.RandomState(self._seed if seed is None else seed)
     self._state = State(
         taxi_x=rng.randint(_NUM_COLUMNS),
         taxi_y=rng.randint(_NUM_ROWS),

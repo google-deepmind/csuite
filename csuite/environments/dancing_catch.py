@@ -20,6 +20,7 @@ Environment description can be found in the `DancingCatch` environment class.
 import copy
 import dataclasses
 import enum
+from typing import Optional
 
 from csuite.environments import base
 from dm_env import specs
@@ -129,13 +130,13 @@ class DancingCatch(base.Environment):
         swap_every=swap_every)
     self._state = None
 
-  def start(self):
+  def start(self, seed: Optional[int] = None):
     """Initializes the environment and returns an initial observation."""
 
     # The initial state has one ball appearing in a random column at the top,
     # and the paddle centered at the bottom.
 
-    rng = np.random.RandomState(self._seed)
+    rng = np.random.RandomState(self._seed if seed is None else seed)
     self._state = State(
         paddle_x=self._params.columns // 2,
         paddle_y=self._params.rows - 1,

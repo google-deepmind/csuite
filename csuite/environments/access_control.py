@@ -23,6 +23,7 @@ import copy
 import dataclasses
 import enum
 import itertools
+from typing import Optional
 
 from csuite.environments import base
 from dm_env import specs
@@ -134,9 +135,9 @@ class AccessControl(base.Environment):
 
     self._state = None
 
-  def start(self):
+  def start(self, seed: Optional[int] = None):
     """Initializes the environment and returns an initial observation."""
-    rng = np.random.RandomState(self._seed)
+    rng = np.random.RandomState(self._seed if seed is None else seed)
     self._state = State(
         num_busy_servers=0,
         incoming_priority=rng.choice(self._params.priorities),

@@ -22,7 +22,8 @@ class.
 import copy
 import dataclasses
 import enum
-from typing import Any, Callable
+from typing import Any, Callable, Optional
+
 from csuite.environments import base
 from dm_env import specs
 
@@ -185,6 +186,7 @@ class Pendulum(base.Environment):
       reward_fn: A callable which returns a float reward given current state.
       seed: Seed for the internal random number generator.
     """
+    del seed
     self._params = Params(
         start_state_fn=start_state_fn,
         friction=friction,
@@ -196,8 +198,9 @@ class Pendulum(base.Environment):
     self._state = None
     self._torque = 0
 
-  def start(self):
+  def start(self, seed: Optional[int] = None):
     """Initializes the environment and returns an initial observation."""
+    del seed
     self._state = self._params.start_state_fn()
     return np.array((np.cos(self._state.angle),
                      np.sin(self._state.angle),

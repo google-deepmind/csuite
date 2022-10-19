@@ -16,10 +16,9 @@
 """Abstract base class for csuite environments."""
 
 import abc
-from typing import Any, Tuple
+from typing import Any, Optional, Tuple
 
 from dm_env import specs
-
 
 # TODO(b/243715530): The base environment should implementing this check.
 STEP_WITHOUT_START_ERR = ("Environment state has not been initialized. `start`"
@@ -37,11 +36,8 @@ class Environment(abc.ABC):
   """
 
   @abc.abstractmethod
-  def start(self) -> Any:
-    """Starts (or restarts) the environment by setting the initial state.
-
-    Returns an initial observation.
-    """
+  def start(self, seed: Optional[int] = None) -> Any:
+    """Starts (or restarts) the environment and returns an observation."""
 
   @abc.abstractmethod
   def step(self, action: Any) -> Tuple[Any, Any]:

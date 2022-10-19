@@ -183,14 +183,14 @@ class PendulumPoke(base.Environment):
     self._torque = 0
     self._perturb_direction = 0  # For visualization purposes.
 
-  def start(self):
+  def start(self, seed=None):
     """Initializes the environment and returns an initial observation."""
-    self._state = State(angle=0.,
-                        velocity=0.,
-                        rng=np.random.RandomState(self._seed))
-    return np.array((np.cos(self._state.angle),
-                     np.sin(self._state.angle),
-                     self._state.velocity),
+    self._state = State(
+        angle=0.,
+        velocity=0.,
+        rng=np.random.RandomState(self._seed if seed is None else seed))
+    return np.array((np.cos(self._state.angle), np.sin(
+        self._state.angle), self._state.velocity),
                     dtype=np.float32)
 
   @property
@@ -226,8 +226,8 @@ class PendulumPoke(base.Environment):
     # If the pendulum is in the rewarding region, with the given probability
     # add a force in a direction chosen uniformly at random.
     reward_angle_rad = _REWARD_ANGLE * _RADIAN_MULTIPLIER
-    if ((np.pi - reward_angle_rad < new_angle < np.pi + reward_angle_rad)
-        and self._state.rng.uniform() < self._params.perturb_prob):
+    if ((np.pi - reward_angle_rad < new_angle < np.pi + reward_angle_rad) and
+        self._state.rng.uniform() < self._params.perturb_prob):
       if self._state.rng.uniform() < 0.5:
         applied_torque = self._torque - self._params.perturb_torque
         self._perturb_direction = -1
@@ -239,12 +239,9 @@ class PendulumPoke(base.Environment):
       self._perturb_direction = 0
 
     for _ in range(self._params.act_step_period):
-      new_velocity += (
-          (applied_torque  -
-           self._params.friction * new_velocity -
-           self._params.gravity * np.sin(new_angle))
-          * self._params.simulation_step_size
-      )
+      new_velocity += ((applied_torque - self._params.friction * new_velocity -
+                        self._params.gravity * np.sin(new_angle)) *
+                       self._params.simulation_step_size)
       new_angle += new_velocity * self._params.simulation_step_size
 
     # Ensure the angle is between 0 and 2*pi.
@@ -254,12 +251,10 @@ class PendulumPoke(base.Environment):
     new_velocity = np.clip(new_velocity, -self._params.max_speed,
                            self._params.max_speed)
 
-    self._state = State(angle=new_angle,
-                        velocity=new_velocity,
-                        rng=self._state.rng)
-    return (np.array((np.cos(self._state.angle),
-                      np.sin(self._state.angle),
-                      self._state.velocity),
+    self._state = State(
+        angle=new_angle, velocity=new_velocity, rng=self._state.rng)
+    return (np.array((np.cos(self._state.angle), np.sin(
+        self._state.angle), self._state.velocity),
                      dtype=np.float32),
             self._params.reward_fn(self._state, self._torque,
                                    self._params.simulation_step_size))
@@ -294,9 +289,8 @@ class PendulumPoke(base.Environment):
 
     self._state = copy.deepcopy(state)
 
-    return np.array((np.cos(self._state.angle),
-                     np.sin(self._state.angle),
-                     self._state.velocity),
+    return np.array((np.cos(self._state.angle), np.sin(
+        self._state.angle), self._state.velocity),
                     dtype=np.float32)
 
   def render(self):
@@ -370,8 +364,9 @@ class PendulumPoke(base.Environment):
     # Drawing perturbation arrow.
     if self._perturb_direction == 1:
       tip_coords = (_IMAGE_SIZE // 4 - _TIP_RADIUS, _IMAGE_SIZE // 8)
-      arrow_coords = [tip_coords,
-                      (_IMAGE_SIZE // 4 + _TIP_RADIUS, _IMAGE_SIZE // 8)]
+      arrow_coords = [
+          tip_coords, (_IMAGE_SIZE // 4 + _TIP_RADIUS, _IMAGE_SIZE // 8)
+      ]
       dct.line(arrow_coords, fill="red", width=_PENDULUM_WIDTH)
       dct.regular_polygon((tip_coords, _ARROW_WIDTH * 1.2),
                           rotation=90,
