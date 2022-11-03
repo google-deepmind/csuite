@@ -46,5 +46,6 @@ setup(
     python_requires='>=3.7',
     classifiers=[
         # TODO(b/241264065): list classifiers.
+        'Topic :: Scientific/Engineering :: Artificial Intelligence',
     ],
 )
