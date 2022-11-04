@@ -89,7 +89,7 @@ class State:
   """
   angle: float
   velocity: float
-  rng: np.random.RandomState
+  rng: np.random.Generator
 
 
 @dataclasses.dataclass
@@ -188,7 +188,7 @@ class PendulumPoke(base.Environment):
     self._state = State(
         angle=0.,
         velocity=0.,
-        rng=np.random.RandomState(self._seed if seed is None else seed))
+        rng=np.random.default_rng(self._seed if seed is None else seed))
     return np.array((np.cos(self._state.angle), np.sin(
         self._state.angle), self._state.velocity),
                     dtype=np.float32)

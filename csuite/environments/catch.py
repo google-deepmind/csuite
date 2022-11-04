@@ -81,7 +81,7 @@ class State:
   paddle_x: int
   paddle_y: int
   balls: list[tuple[int, int]]
-  rng: np.random.RandomState
+  rng: np.random.Generator
 
 
 class Catch(base.Environment):
@@ -124,12 +124,11 @@ class Catch(base.Environment):
 
     # The initial state has one ball appearing in a random column at the top,
     # and the paddle centered at the bottom.
-
-    rng = np.random.RandomState(self._seed if seed is None else seed)
+    rng = np.random.default_rng(self._seed if seed is None else seed)
     self._state = State(
         paddle_x=self._params.columns // 2,
         paddle_y=self._params.rows - 1,
-        balls=[(rng.randint(self._params.columns), 0)],
+        balls=[(rng.integers(self._params.columns), 0)],
         rng=rng,
     )
     return self._get_observation()
@@ -182,7 +181,7 @@ class Catch(base.Environment):
     # Add new ball with given probability.
     if self._state.rng.random() < self._params.spawn_probability:
       self._state.balls.append(
-          (self._state.rng.randint(self._params.columns), 0))
+          (self._state.rng.integers(self._params.columns), 0))
 
     return self._get_observation(), reward
 

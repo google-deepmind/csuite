@@ -165,7 +165,7 @@ class State:
   taxi_y: int
   passenger_loc: int
   destination: int
-  rng: np.random.RandomState
+  rng: np.random.Generator
 
 
 class Taxi(base.Environment):
@@ -209,12 +209,12 @@ class Taxi(base.Environment):
 
   def start(self, seed: Optional[int] = None):
     """Initializes the environment and returns an initial observation."""
-    rng = np.random.RandomState(self._seed if seed is None else seed)
+    rng = np.random.default_rng(self._seed if seed is None else seed)
     self._state = State(
-        taxi_x=rng.randint(_NUM_COLUMNS),
-        taxi_y=rng.randint(_NUM_ROWS),
-        passenger_loc=rng.randint(_NUM_POSITIONS - 1),
-        destination=rng.randint(_NUM_DEST),
+        taxi_x=rng.integers(_NUM_COLUMNS),
+        taxi_y=rng.integers(_NUM_ROWS),
+        passenger_loc=rng.integers(_NUM_POSITIONS - 1),
+        destination=rng.integers(_NUM_DEST),
         rng=rng,
     )
     return self._get_observation()
@@ -284,8 +284,8 @@ class Taxi(base.Environment):
       else:
         reward = 20
         # Add new passenger.
-        self._state.passenger_loc = self._state.rng.randint(_NUM_POSITIONS - 1)
-        self._state.destination = self._state.rng.randint(_NUM_DEST)
+        self._state.passenger_loc = self._state.rng.integers(_NUM_POSITIONS - 1)
+        self._state.destination = self._state.rng.integers(_NUM_DEST)
 
     return self._get_observation(), reward
 
