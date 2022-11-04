@@ -16,7 +16,7 @@
 """Wrapper for adapating a csuite base.Environment to OpenAI gym interface."""
 
 import typing
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Dict, Tuple, Optional, Union
 
 from csuite.environments import base
 from dm_env import specs
@@ -35,6 +35,7 @@ class GymFromCSuite(gym.Env):
 
   def __init__(self, csuite_env: base.Environment):
     self._csuite_env = csuite_env
+    self._np_random = None  # GYM env_checker requires a _np_random attr
     self.viewer = None
 
   def step(self, action) -> _GymTimestep:
@@ -48,9 +49,20 @@ class GymFromCSuite(gym.Env):
 
     return observation, reward, False, {}
 
-  def reset(self) -> np.ndarray:
-    observation = self._csuite_env.start()
-    return observation
+  def reset(self,
+            seed: Optional[int] = None,
+            options: Optional[dict] = None):  # pylint: disable=g-bare-generic
+    if options:
+      raise NotImplementedError('options not supported with the gym wrapper.')
+    del options
+    observation = self._csuite_env.start(seed)
+    state = self._csuite_env.get_state()
+    self._np_random = state.rng if hasattr(
+        state, 'rng') else np.random.default_rng(seed)
+    if gym.__version__ == '0.19.0':
+      return observation
+    else:
+      return observation, {}
 
   def render(self, mode: str = 'rgb_array') -> Union[np.ndarray, bool]:
 
@@ -100,4 +112,4 @@ class GymFromCSuite(gym.Env):
 
   def __getattr__(self, attr):
     """Delegate attribute access to underlying environment."""
-    return getattr(self._env, attr)
+    return getattr(self._csuite_env, attr)
