@@ -43,7 +43,7 @@ setup(
         'pytest>=6.2.5',
     ],
     zip_safe=False,  # Required for full installation.
-    python_requires='>=3.7',
+    python_requires='>=3.9,<3.11',
     classifiers=[
         # TODO(b/241264065): list classifiers.
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
