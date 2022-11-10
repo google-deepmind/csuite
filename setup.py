@@ -47,5 +47,7 @@ setup(
     classifiers=[
         # TODO(b/241264065): list classifiers.
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
     ],
 )
