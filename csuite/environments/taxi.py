@@ -339,7 +339,7 @@ class Taxi(base.Environment):
     Returns:
       A NumPy array giving an image of the environment state.
     """
-    image = Image.new("RGB", (_HEIGHT, _WIDTH), "white")
+    image = Image.new("RGB", (_WIDTH, _HEIGHT), "white")
     dct = ImageDraw.Draw(image)
 
     # First place four colored destination squares so grid lines appear on top.
