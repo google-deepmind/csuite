@@ -24,6 +24,7 @@ import enum
 from typing import Optional
 
 from csuite.environments import base
+from csuite.environments import common
 from dm_env import specs
 
 import numpy as np
@@ -239,5 +240,5 @@ class Catch(base.Environment):
     """Returns a copy of the environment configuration."""
     return copy.deepcopy(self._params)
 
-  def render(self):
-    return self._get_observation()
+  def render(self) -> np.ndarray:
+    return common.binary_board_to_rgb(self._get_observation())
