@@ -19,6 +19,7 @@ import abc
 from typing import Any, Optional, Tuple
 
 from dm_env import specs
+import numpy as np
 
 # TODO(b/243715530): The base environment should implementing this check.
 STEP_WITHOUT_START_ERR = ("Environment state has not been initialized. `start`"
@@ -68,5 +69,9 @@ class Environment(abc.ABC):
     """Sets the environment state."""
 
   @abc.abstractmethod
-  def render(self) -> Any:
-    """Returns an object (e.g. a numpy array) to facilitate visualization."""
+  def render(self) -> np.ndarray:
+    """Returns an rgb (uint8) numpy array to facilitate visualization.
+
+    The shape of this array should be (width, height, 3), where the last
+    dimension is for red, green, and blue. The values are in [0, 255].
+    """
