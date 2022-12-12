@@ -234,7 +234,7 @@ class AccessControl(base.Environment):
     return copy.deepcopy(self._params)
 
   def render(self):
-    board = np.ones((len(_PRIORITIES), _NUM_SERVERS), dtype=np.uint8)
+    board = np.ones((len(_PRIORITIES), _NUM_SERVERS + 1), dtype=np.uint8)
     priority = _PRIORITIES.index(self._state.incoming_priority)
     busy_num = self._state.num_busy_servers
     board[priority, busy_num] = 0
