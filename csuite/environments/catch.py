@@ -24,6 +24,7 @@ import enum
 from typing import Optional
 
 from csuite.environments import base
+from csuite.environments import common
 from dm_env import specs
 
 import numpy as np
@@ -247,20 +248,5 @@ class Catch(base.Environment):
     """Returns a copy of the environment configuration."""
     return copy.deepcopy(self._params)
 
-  def render(self):
-    image = Image.new("RGB", (_WIDTH, _HEIGHT), "white")
-    dct = ImageDraw.Draw(image)
-
-    def get_bounding_box(x, y):
-      return [(_PIXELS_PER_SQ * (x + 1), _PIXELS_PER_SQ * (y + 1)),
-              (_PIXELS_PER_SQ * (x + 2), _PIXELS_PER_SQ * (y + 2))]
-
-    # draw paddle
-    dct.rectangle(get_bounding_box(self._state.paddle_x, self._state.paddle_y),
-                  fill=_BLACK_HEX)
-
-    # draw balls
-    for x, y in self._state.balls:
-      dct.rectangle(get_bounding_box(x, y), fill=_BLACK_HEX)
-
-    return np.asarray(image, dtype=np.uint8)
+  def render(self) -> np.ndarray:
+    return common.binary_board_to_rgb(self._get_observation())

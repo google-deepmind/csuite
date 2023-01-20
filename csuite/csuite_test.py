@@ -39,8 +39,10 @@ class CSuiteTest(parameterized.TestCase):
     init_state = env.get_state()
 
     for i in range(2):
-      with self.subTest(name="steps-render", step=i):
-        env.render()
+      with self.subTest(name="steps-render-successful", step=i):
+        image = env.render()
+      with self.subTest(name="steps-render-compliant", step=i):
+        self._assert_image_compliant(image)
       with self.subTest(name="steps-observation_spec", step=i):
         observation_spec.validate(obs)
       with self.subTest(name="steps-step", step=i):
@@ -98,6 +100,13 @@ class CSuiteTest(parameterized.TestCase):
           f"The observation sequences (of length {len(seq1)}) are not the "
           "same. The differences are:\n" +
           "\n".join([f"at idx={idx}: {msg}" for idx, msg in problems]))
+
+  def _assert_image_compliant(self, image: np.ndarray):
+    if not (len(image.shape) == 3 and image.shape[-1] == 3 and
+            image.dtype == np.uint8):
+      self.fail(
+          "The render() method is expected to return an uint8 rgb image array. "
+          f"Got an array of shape {image.shape}, dtype {image.dtype}.")
 
 
 if __name__ == "__main__":

@@ -23,6 +23,7 @@ import enum
 from typing import Optional
 
 from csuite.environments import base
+from csuite.environments import common
 from dm_env import specs
 
 import numpy as np
@@ -215,19 +216,22 @@ class WindyCatch(base.Environment):
 
     return self._get_observation(), reward
 
+  def _get_board(self) -> np.ndarray:
+    board = np.zeros((_ROWS, _COLUMNS), dtype=int)
+    board.fill(0)
+    board[self._state.paddle_y, self._state.paddle_x] = 1
+    for x, y in self._state.balls:
+      board[y, x] = 1
+    return board
+
   def _get_observation(self) -> np.ndarray:
     """Converts internal environment state to an array observation.
 
     Returns:
       A binary array of size (rows * columns + 3,).
     """
-    board = np.zeros((_ROWS, _COLUMNS), dtype=int)
-    board.fill(0)
-    board[self._state.paddle_y, self._state.paddle_x] = 1
-    for x, y in self._state.balls:
-      board[y, x] = 1
-    board = board.flatten()
-    return np.concatenate([board, self._state.wind_direction])
+    return np.concatenate([
+        self._get_board().flatten(), self._state.wind_direction])
 
   def observation_spec(self):
     """Describes the observation specs of the environment."""
@@ -272,5 +276,10 @@ class WindyCatch(base.Environment):
     """Returns a copy of the environment configuration."""
     return copy.deepcopy(self._params)
 
-  def render(self):
-    return self._get_observation()
+  def render(self) -> np.ndarray:
+    board = self._get_board()
+    num_cols = board.shape[1]
+    header = np.ones((2, num_cols), dtype=np.uint8)
+    center = num_cols // 2
+    header[0, center-1:center+2] = self._state.wind_direction
+    return common.binary_board_to_rgb(np.concatenate([board, header]))

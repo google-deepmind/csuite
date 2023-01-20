@@ -26,6 +26,7 @@ import itertools
 from typing import Optional
 
 from csuite.environments import base
+from csuite.environments import common
 from dm_env import specs
 
 import numpy as np
@@ -134,6 +135,7 @@ class AccessControl(base.Environment):
       self.lookup_table[state] = idx
 
     self._state = None
+    self._last_action = -1  # Only used for visualization.
 
   def start(self, seed: Optional[int] = None):
     """Initializes the environment and returns an initial observation."""
@@ -170,6 +172,8 @@ class AccessControl(base.Environment):
     # Check if input action is valid.
     if action not in [Action.REJECT, Action.ACCEPT]:
       raise ValueError(_INVALID_ACTION.format(action=action))
+
+    self._last_action = action
 
     reward = 0
     # If customer is accepted, ensure there are enough free servers.
@@ -230,5 +234,18 @@ class AccessControl(base.Environment):
     return copy.deepcopy(self._params)
 
   def render(self):
-    return np.array(
-        [self._state.num_busy_servers, self._state.incoming_priority])
+    board = np.ones((len(_PRIORITIES), _NUM_SERVERS + 1), dtype=np.uint8)
+    priority = _PRIORITIES.index(self._state.incoming_priority)
+    busy_num = self._state.num_busy_servers
+    board[priority, busy_num] = 0
+    rgb_array = common.binary_board_to_rgb(board)
+
+    if self._last_action == Action.ACCEPT:
+      rgb_array[priority, busy_num, 1] = 1  # Green.
+    elif self._last_action == Action.REJECT:
+      rgb_array[priority, busy_num, 0] = 1  # Red.
+    else:
+      # Will remain black.
+      assert self._last_action == -1, "Only other possible value."
+
+    return rgb_array
