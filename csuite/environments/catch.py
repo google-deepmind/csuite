@@ -28,8 +28,6 @@ from csuite.environments import common
 from dm_env import specs
 
 import numpy as np
-from PIL import Image
-from PIL import ImageDraw
 
 # Error messages.
 _INVALID_ACTION = "Invalid action: expected 0, 1, or 2 but received {action}."
@@ -43,12 +41,6 @@ _INVALID_BALLS_RANGE = (
 _ROWS = 10
 _COLUMNS = 5
 _SPAWN_PROBABILITY = 0.1
-
-# Variables for pixel visualization of the environment.
-_PIXELS_PER_SQ = 25  # size of each grid square.
-_BLACK_HEX = "#000000"
-_HEIGHT = _PIXELS_PER_SQ * (_ROWS + 2)
-_WIDTH = _PIXELS_PER_SQ * (_COLUMNS + 2)
 
 
 class Action(enum.IntEnum):
