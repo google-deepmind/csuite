@@ -287,17 +287,6 @@ class PuckWorld(base.Environment):
     image = Image.new("RGB", (_IMAGE_WIDTH, _IMAGE_HEIGHT), "white")
     dct = ImageDraw.Draw(image)
 
-    # for row in range(1, _HEIGHT + 2):  # horizontal grid lines.
-    #   line_coordinates = [(_PIXELS_PER_SQ, _PIXELS_PER_SQ * row),
-    #                       (_PIXELS_PER_SQ * (_IMAGE_HEIGHT + 1),
-    #                        _PIXELS_PER_SQ * row)]
-    #   dct.line(line_coordinates, fill="black", width=_LINE_WIDTH_THIN)
-    # for col in range(1, _NUM_COLUMNS + 2):  # vertical grid lines.
-    #   line_coordinates = [(_PIXELS_PER_SQ * col, _PIXELS_PER_SQ),
-    #                       (_PIXELS_PER_SQ * col,
-    #                        _PIXELS_PER_SQ * (_NUM_ROWS + 1))]
-    #   dct.line(line_coordinates, fill="black", width=_LINE_WIDTH_THIN)
-
     def get_circle_coordinates(x, y, radius):
       return [(x - radius) * _PIXELS_PER_SQ,
               (y - radius) * _PIXELS_PER_SQ,

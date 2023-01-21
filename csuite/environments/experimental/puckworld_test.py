@@ -1,7 +1,7 @@
 """Tests for PuckWorld."""
 
 from absl.testing import absltest
-from csuite.environments import puckworld
+from csuite.environments.experimental import puckworld
 
 
 class PuckWorldTest(absltest.TestCase):
