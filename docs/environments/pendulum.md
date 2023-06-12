@@ -53,7 +53,7 @@ The sign indicates the direction of torque.
 
 ## Rewards
 The default reward function is dense:
-reward = - $(\pi - \theta)**2 - 0.1 * (\dot{\theta})**2$
+reward = - $(\pi - \theta)^2 - 0.1 * \dot{\theta}^2$
 
 There is a sparse-reward variant available:
 * +1 reward if the pendulum is within a small range of the upright position:
