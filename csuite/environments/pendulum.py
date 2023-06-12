@@ -33,12 +33,13 @@ from PIL import ImageDraw
 
 # Default environment variables.
 _NUM_ACTIONS = 3  # Size of action space discretization.
-_FRICTION = 0.1
+_FRICTION = 0.3
 _GRAVITY = 9.81
 _SIMULATION_STEP_SIZE = 0.05
 _ACT_STEP_PERIOD = 4
 _MAX_SPEED = np.inf
 _REWARD_ANGLE = 30
+_TORQUE_MULTIPLIER = 2
 
 # Converter for degrees to radians.
 _RADIAN_MULTIPLIER = np.pi / 180
@@ -70,7 +71,7 @@ class Action(enum.IntEnum):
   @property
   def tau(self):
     """Maps NEGATIVE to -1, STAY to 0, and POSITIVE to 1."""
-    return self.value - 1
+    return (self.value - 1) * _TORQUE_MULTIPLIER
 
 
 @dataclasses.dataclass
@@ -98,10 +99,23 @@ class Params:
   reward_fn: Callable[..., float]
 
 
-# Default start state and reward function.
+# Default start state
 def start_from_bottom():
   """Returns default start state with pendulum hanging vertically downwards."""
   return State(angle=0., velocity=0.)
+
+# Other start states
+def start_close_to_bottom():
+ """Returns a start state with the pendulum almost vertically downwards."""
+ return State(angle=np.pi/6, velocity=0.)
+
+def start_from_side():
+  """Returns a start state with the pendulum being horizontal."""
+  return State(angle=np.pi/2, velocity=0.)
+
+def start_from_top():
+  """Returns a start state with the pendulum in the upright position."""
+  return State(angle=np.pi, velocity=0.)
 
 
 def sparse_reward(state: State,
@@ -127,6 +141,22 @@ def sparse_reward(state: State,
     return 0.
 
 
+def dense_reward(state: State,
+                 unused_torque: Any,
+                 unused_step_size: Any,) -> float:
+  """Returns a dense reward for the continuing pendulum problem.
+
+  Args:
+    state: A State object containing the current angle and velocity.
+
+  Returns:
+    A reward inversely proportional to the angular distance of the pendulum
+    from the goal position as well as a penalty for large angular velocities.
+  """
+  cost = (np.pi - _alias_angle(state.angle)) ** 2 + 0.1 * state.velocity ** 2
+  return -cost
+
+
 def _alias_angle(angle: float) -> float:
   """Returns an angle between 0 and 2*pi."""
   return angle % (2 * np.pi)
@@ -146,9 +176,13 @@ class Pendulum(base.Environment):
   this environment returns the cosine and sine of the angle.
   3) There are only three discrete actions (apply a torque of -1, apply a torque
   of +1, and apply no-op) as opposed to a continuous torque value.
-  4) The default reward function is implemented as a sparse reward, i.e. there
-  is only a reward of 1 attained when the angle is in the region specified by
-  the interval (pi - reward_angle, pi + reward_angle).
+  4) The default reward signal is dense: inversely proportional to the
+  pendulum's angular distance from the upright position and inversely
+  proportional to its angular velocity:
+  reward = - (pi - angle)**2 - 0.1 * (angular_velocity)**2
+  There is also an alternative sparse signal: 0 everywhere and 1 when
+  the angle is in the region specified by the interval
+  (pi - reward_angle, pi + reward_angle).
 
   The pendulum's motion is described by the equation
   ```
@@ -169,7 +203,7 @@ class Pendulum(base.Environment):
                simulation_step_size=_SIMULATION_STEP_SIZE,
                act_step_period=_ACT_STEP_PERIOD,
                max_speed=_MAX_SPEED,
-               reward_fn=sparse_reward,
+               reward_fn=dense_reward,
                seed=None):
     """Initializes a new pendulum environment.
 
@@ -242,6 +276,9 @@ class Pendulum(base.Environment):
                         self._params.gravity * np.sin(new_angle)) *
                        self._params.simulation_step_size)
       new_angle += new_velocity * self._params.simulation_step_size
+      ### alternative gym-esque dynamics:
+      # new_velocity += (3 * self._torque - (3 * self._params.gravity / 2) * np.sin(self._state.angle)) * self._params.simulation_step_size
+      # new_angle += new_velocity * self._params.simulation_step_size
 
     # Ensure the angle is between 0 and 2*pi.
     new_angle = _alias_angle(new_angle)
