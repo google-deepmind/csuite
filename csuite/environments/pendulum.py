@@ -40,6 +40,7 @@ _ACT_STEP_PERIOD = 4
 _MAX_SPEED = np.inf
 _REWARD_ANGLE = 30
 _TORQUE_MULTIPLIER = 2
+_REWARD_OFFSET = 0
 
 # Converter for degrees to radians.
 _RADIAN_MULTIPLIER = np.pi / 180
@@ -97,6 +98,7 @@ class Params:
   act_step_period: int
   max_speed: float
   reward_fn: Callable[..., float]
+  reward_offset: float
 
 
 # Default start state
@@ -204,6 +206,7 @@ class Pendulum(base.Environment):
                act_step_period=_ACT_STEP_PERIOD,
                max_speed=_MAX_SPEED,
                reward_fn=dense_reward,
+               reward_offset=_REWARD_OFFSET,
                seed=None):
     """Initializes a new pendulum environment.
 
@@ -228,6 +231,7 @@ class Pendulum(base.Environment):
         simulation_step_size=simulation_step_size,
         act_step_period=act_step_period,
         max_speed=max_speed,
+        reward_offset=reward_offset,
         reward_fn=reward_fn)
     self._state = None
     self._torque = 0
@@ -293,7 +297,7 @@ class Pendulum(base.Environment):
                       self._state.velocity),
                      dtype=np.float32),
             self._params.reward_fn(self._state, self._torque,
-                                   self._params.simulation_step_size))
+                                   self._params.simulation_step_size) + self._params.reward_offset)
 
   def observation_spec(self):
     """Describes the observation specs of the environment."""

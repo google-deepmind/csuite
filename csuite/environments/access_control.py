@@ -35,6 +35,7 @@ import numpy as np
 _NUM_SERVERS = 10
 _FREE_PROBABILITY = 0.06
 _PRIORITIES = (1, 2, 4, 8)
+_REWARD_OFFSET = 0
 
 # Error messages.
 _INVALID_ACTION = "Invalid action: expected 0 or 1 but received {action}."
@@ -60,10 +61,12 @@ class Params:
       becomes free at each timestep.
     priorities: A list of floats, giving the possible priorities of incoming
       customers.
+    reward_offset: A constant offset added to all the rewards.
   """
   num_servers: int
   free_probability: float
   priorities: list[float]
+  reward_offset: float
 
 
 @dataclasses.dataclass
@@ -107,6 +110,7 @@ class AccessControl(base.Environment):
                num_servers=_NUM_SERVERS,
                free_probability=_FREE_PROBABILITY,
                priorities=_PRIORITIES,
+               reward_offset=_REWARD_OFFSET,
                seed=None):
     """Initialize Access-Control environment.
 
@@ -117,13 +121,15 @@ class AccessControl(base.Environment):
         becomes free at each timestep.
       priorities: A list of floats, giving the possible priorities of incoming
         customers.
+      reward_offset: A constant offset added to all the rewards.
       seed: Seed for the internal random number generator.
     """
     self._seed = seed
     self._params = Params(
         num_servers=num_servers,
         free_probability=free_probability,
-        priorities=priorities)
+        priorities=priorities,
+        reward_offset=reward_offset)
     self.num_states = ((self._params.num_servers + 1) *
                        len(self._params.priorities))
 
@@ -175,11 +181,11 @@ class AccessControl(base.Environment):
 
     self._last_action = action
 
-    reward = 0
+    reward = 0 + self._params.reward_offset
     # If customer is accepted, ensure there are enough free servers.
     if (action == Action.ACCEPT and
         self._state.num_busy_servers < self._params.num_servers):
-      reward = self._state.incoming_priority
+      reward += self._state.incoming_priority
       self._state.num_busy_servers += 1
 
     new_priority = self._state.rng.choice(self._params.priorities)

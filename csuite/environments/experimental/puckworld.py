@@ -27,6 +27,7 @@ _GOAL_RADIUS = 0.25
 _GOAL_UPDATE_INTERVAL = 300
 _SIMULATION_STEP_SIZE = 0.05
 _ACT_STEP_PERIOD = 4
+_REWARD_OFFSET = 0
 
 # Error messages.
 _INVALID_ACTION = "Invalid action: expected value in [0,3] but received {}."
@@ -97,6 +98,7 @@ class Params:
   simulation_step_size: float
   act_step_period: int
   max_velocity: float
+  reward_offset: float
 
 
 class PuckWorld(base.Environment):
@@ -107,6 +109,7 @@ class PuckWorld(base.Environment):
                goal_update_interval=_GOAL_UPDATE_INTERVAL,
                simulation_step_size=_SIMULATION_STEP_SIZE,
                act_step_period=_ACT_STEP_PERIOD,
+               reward_offset=_REWARD_OFFSET,
                seed=None):
     """Initialize PuckWorld environment.
 
@@ -116,13 +119,16 @@ class PuckWorld(base.Environment):
     self._seed = seed
     self._state = None
     self._counter = None
+    assert friction >= 0
+    max_vel = (_ACCELERATION / friction) if friction > 0.1 else 5
     self._params = Params(
       puck_radius=puck_radius,
       friction=friction,
       goal_update_interval=goal_update_interval,
       simulation_step_size=simulation_step_size,
       act_step_period=act_step_period,
-      max_velocity=(_ACCELERATION / friction)
+      max_velocity=max_vel,
+      reward_offset=reward_offset
     )
 
   def start(self, seed: Optional[int] = None):
@@ -187,6 +193,8 @@ class PuckWorld(base.Environment):
         self._state.puck_pos_y += (self._state.puck_vel_y *
                                    self._params.simulation_step_size)
 
+    # ToDo: can clip velocity here
+
     # Check for boundary collisions.
     if self._state.puck_pos_x < self._params.puck_radius:
       self._state.puck_vel_x *= -0.5
@@ -207,7 +215,7 @@ class PuckWorld(base.Environment):
 
     # Compute reward.
     distance_from_goal = self._compute_distance_from_goal()
-    reward = -distance_from_goal
+    reward = -distance_from_goal + self._params.reward_offset
 
     return self._get_observation(), reward
 

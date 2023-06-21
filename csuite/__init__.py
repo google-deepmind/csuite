@@ -26,6 +26,7 @@ from csuite.environments import taxi
 from csuite.environments import windy_catch
 from csuite.environments.base import Environment
 from csuite.environments.experimental import pendulum_poke
+from csuite.environments.experimental import puckworld
 from csuite.utils import dm_env_wrapper
 from csuite.utils import gym_wrapper
 
@@ -38,6 +39,7 @@ class EnvName(enum.Enum):
   PENDULUM_POKE = 'pendulum_poke'
   TAXI = 'taxi'
   WINDY_CATCH = 'windy_catch'
+  PUCKWORLD = 'puckworld'
 
 
 _ENVS = {
@@ -48,6 +50,7 @@ _ENVS = {
     EnvName.TAXI: taxi.Taxi,
     EnvName.PENDULUM: pendulum.Pendulum,
     EnvName.PENDULUM_POKE: pendulum_poke.PendulumPoke,
+    EnvName.PUCKWORLD: puckworld.PuckWorld
 }
 
 
