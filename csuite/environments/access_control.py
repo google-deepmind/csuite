@@ -61,7 +61,7 @@ class Params:
       becomes free at each timestep.
     priorities: A list of floats, giving the possible priorities of incoming
       customers.
-    reward_offset: A constant offset added to all the rewards.
+    reward_offset: A constant added to all the rewards.
   """
   num_servers: int
   free_probability: float
@@ -121,7 +121,7 @@ class AccessControl(base.Environment):
         becomes free at each timestep.
       priorities: A list of floats, giving the possible priorities of incoming
         customers.
-      reward_offset: A constant offset added to all the rewards.
+      reward_offset: A constant added to all the rewards.
       seed: Seed for the internal random number generator.
     """
     self._seed = seed
@@ -181,7 +181,7 @@ class AccessControl(base.Environment):
 
     self._last_action = action
 
-    reward = 0 + self._params.reward_offset
+    reward = 0
     # If customer is accepted, ensure there are enough free servers.
     if (action == Action.ACCEPT and
         self._state.num_busy_servers < self._params.num_servers):
@@ -197,7 +197,7 @@ class AccessControl(base.Environment):
     self._state.num_busy_servers = num_busy_servers - num_new_free_servers
     self._state.incoming_priority = new_priority
 
-    return self._get_observation(), reward
+    return self._get_observation(), reward + self._params.reward_offset
 
   def _get_observation(self):
     """Converts internal state to an index uniquely identifying the state.

@@ -215,9 +215,9 @@ class PuckWorld(base.Environment):
 
     # Compute reward.
     distance_from_goal = self._compute_distance_from_goal()
-    reward = -distance_from_goal + self._params.reward_offset
+    reward = -distance_from_goal
 
-    return self._get_observation(), reward
+    return self._get_observation(), reward + self._params.reward_offset
 
   def _get_observation(self):
     return np.array((self._state.puck_pos_x,

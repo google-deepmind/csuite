@@ -36,11 +36,14 @@ _INVALID_PADDLE_POS = ("Invalid state: paddle should be positioned at the"
 _INVALID_BALLS_RANGE = (
     "Invalid state: positions of balls and paddle not in expected"
     " row range [0, {rows}) and column range [0, {columns}).")
+_INVALID_OBS_TYPE = ("Invalid observation type: expected 'discrete' or "
+                     "'continuous'")
 
 # Default environment variables.
 _ROWS = 10
 _COLUMNS = 5
 _SPAWN_PROBABILITY = 0.1
+_REWARD_OFFSET = 0
 
 
 class Action(enum.IntEnum):
@@ -62,10 +65,12 @@ class Params:
     rows: Integer number of rows.
     columns: Integer number of columns.
     spawn_probability: Probability of a new ball spawning.
+    reward_offset: A constant added to all the rewards.
   """
   rows: int
   columns: int
   spawn_probability: float
+  reward_offset: float
 
 
 @dataclasses.dataclass
@@ -106,6 +111,8 @@ class Catch(base.Environment):
                rows=_ROWS,
                columns=_COLUMNS,
                spawn_probability=_SPAWN_PROBABILITY,
+               reward_offset=_REWARD_OFFSET,
+               observation_type="discrete",
                seed=None):
     """Initializes a continuing Catch environment.
 
@@ -113,11 +120,25 @@ class Catch(base.Environment):
       rows: A positive integer denoting the number of rows.
       columns: A positive integer denoting the number of columns.
       spawn_probability: Float giving the probability of a new ball appearing.
+      reward_offset: A constant added to all the rewards.
+      observation_type: A string indicating discrete or continuous.
       seed: Seed for the internal random number generator.
     """
     self._seed = seed
+    if observation_type=='discrete':
+        self._get_observation = self._get_observation_discrete
+        self._observation_spec = self._observation_spec_discrete
+    elif observation_type=='continuous':
+        self._get_observation = self._get_observation_continuous
+        self._observation_spec = self._observation_spec_continuous
+    else:
+        raise ValueError(_INVALID_OBS_TYPE)
+
     self._params = Params(
-        rows=rows, columns=columns, spawn_probability=spawn_probability)
+        rows=rows,
+        columns=columns,
+        spawn_probability=spawn_probability,
+        reward_offset=reward_offset)
     self._state = None
 
   def start(self, seed: Optional[int] = None):
@@ -184,10 +205,10 @@ class Catch(base.Environment):
       self._state.balls.append(
           (self._state.rng.integers(self._params.columns), 0))
 
-    return self._get_observation(), reward
+    return self._get_observation(), reward + self._params.reward_offset
 
-  def _get_observation(self) -> np.ndarray:
-    """Converts internal environment state to an array observation.
+  def _get_observation_discrete(self) -> np.ndarray:
+    """Converts internal environment state to a discrete array observation.
 
     Returns:
       A binary array of size (rows, columns) with entry 1 if it contains either
@@ -200,14 +221,44 @@ class Catch(base.Environment):
       board[y, x] = 1
     return board
 
+  def _get_observation_continuous(self) -> np.ndarray:
+    """Returns a continuous version of the typical discrete 2D board.
+
+    Returns:
+      A 3D vector containing the positions of the paddle and lowermost ball:
+      [paddle_x, ball_x, ball_y], each in [0, 1].
+      If there are no balls present, returns a default value for the
+      ball position.
+    """
+    obs = np.zeros(3)
+    obs[0] = self._state.paddle_x / self._params.columns
+    if self._state.balls:
+      obs[1] = self._state.balls[0][0] / self._params.columns
+      obs[2] = self._state.balls[0][1] / self._params.rows
+    else:
+      obs[1:] = [0, 0]
+    return obs
+
   def observation_spec(self):
-    """Describes the observation specs of the environment."""
+      return self._observation_spec()
+
+  def _observation_spec_discrete(self):
+    """Describes the discrete observation specs of the environment."""
     return specs.BoundedArray(
         shape=(self._params.rows, self._params.columns),
         dtype=int,
         minimum=0,
         maximum=1,
         name="board")
+
+  def _observation_spec_continuous(self):
+    """Describes the continuous observation specs of the environment."""
+    return specs.BoundedArray(
+        shape=(3,),
+        dtype=float,
+        minimum=0,
+        maximum=1,
+        name="position_of_paddle_and_lowermost_ball")
 
   def action_spec(self):
     """Describes the action specs of the environment."""

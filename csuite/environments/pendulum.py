@@ -221,6 +221,7 @@ class Pendulum(base.Environment):
       max_speed: A float giving the maximum speed (in radians/second) allowed in
         the simulation.
       reward_fn: A callable which returns a float reward given current state.
+      reward_offset: A constant added to all the rewards.
       seed: Seed for the internal random number generator.
     """
     del seed
