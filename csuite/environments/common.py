@@ -19,8 +19,8 @@ import numpy as np
 
 
 def binary_board_to_rgb(board: np.ndarray) -> np.ndarray:
-  """Converts a binary 2D array to an rgb array."""
-  board = board.astype(np.uint8) * 255
-  board = np.expand_dims(board, -1)
-  board = np.tile(board, (1, 1, 3))
-  return board
+    """Converts a binary 2D array to an rgb array."""
+    board = board.astype(np.uint8) * 255
+    board = np.expand_dims(board, -1)
+    board = np.tile(board, (1, 1, 3))
+    return board
