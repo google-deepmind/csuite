@@ -84,7 +84,7 @@ class State:
     """
     num_busy_servers: int
     incoming_priority: int
-    rng: np.random.RandomState
+    rng: np.random.Generator
 
 
 class AccessControl(base.Environment):
@@ -145,7 +145,7 @@ class AccessControl(base.Environment):
 
     def start(self, seed: Optional[int] = None):
         """Initializes the environment and returns an initial observation."""
-        rng = np.random.RandomState(self._seed if seed is None else seed)
+        rng = np.random.default_rng(self._seed if seed is None else seed)
         self._state = State(
             num_busy_servers=0,
             incoming_priority=rng.choice(self._params.priorities),

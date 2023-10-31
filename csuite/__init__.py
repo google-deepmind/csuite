@@ -24,9 +24,9 @@ from csuite.environments import dancing_catch
 from csuite.environments import pendulum
 from csuite.environments import taxi
 from csuite.environments import windy_catch
+from csuite.environments import puckworld
 from csuite.environments.base import Environment
 from csuite.environments.experimental import pendulum_poke
-from csuite.environments.experimental import puckworld
 from csuite.utils import dm_env_wrapper
 from csuite.utils import gym_wrapper
 
