@@ -27,51 +27,51 @@ STEP_WITHOUT_START_ERR = ("Environment state has not been initialized. `start`"
 
 
 class Environment(abc.ABC):
-  """Base class for continuing environments.
+    """Base class for continuing environments.
 
-  Observations and valid actions are described by the `specs` module in dm_env.
-  Environment implementations should return specs as specific as possible.
+    Observations and valid actions are described by the `specs` module in dm_env.
+    Environment implementations should return specs as specific as possible.
 
-  Each environment will specify its own environment State, Configuration, and
-  internal random number generator.
-  """
-
-  @abc.abstractmethod
-  def start(self, seed: Optional[int] = None) -> Any:
-    """Starts (or restarts) the environment and returns an observation."""
-
-  @abc.abstractmethod
-  def step(self, action: Any) -> Tuple[Any, Any]:
-    """Takes a step in the environment, returning an observation and reward."""
-
-  @abc.abstractmethod
-  def observation_spec(self) -> specs.Array:
-    """Describes the observation space of the environment.
-
-    May use a subclass of `specs.Array` that specifies additional properties
-    such as min and max bounds on the values.
+    Each environment will specify its own environment State, Configuration, and
+    internal random number generator.
     """
 
-  @abc.abstractmethod
-  def action_spec(self) -> specs.Array:
-    """Describes the valid action space of the environment.
+    @abc.abstractmethod
+    def start(self, seed: Optional[int] = None) -> Any:
+        """Starts (or restarts) the environment and returns an observation."""
 
-    May use a subclass of `specs.Array` that specifies additional properties
-    such as min and max bounds on the values.
-    """
+    @abc.abstractmethod
+    def step(self, action: Any) -> Tuple[Any, Any]:
+        """Takes a step in the environment, returning an observation and reward."""
 
-  @abc.abstractmethod
-  def get_state(self) -> Any:
-    """Returns the environment state."""
+    @abc.abstractmethod
+    def observation_spec(self) -> specs.Array:
+        """Describes the observation space of the environment.
 
-  @abc.abstractmethod
-  def set_state(self, state: Any):
-    """Sets the environment state."""
+        May use a subclass of `specs.Array` that specifies additional properties
+        such as min and max bounds on the values.
+        """
 
-  @abc.abstractmethod
-  def render(self) -> np.ndarray:
-    """Returns an rgb (uint8) numpy array to facilitate visualization.
+    @abc.abstractmethod
+    def action_spec(self) -> specs.Array:
+        """Describes the valid action space of the environment.
 
-    The shape of this array should be (width, height, 3), where the last
-    dimension is for red, green, and blue. The values are in [0, 255].
-    """
+        May use a subclass of `specs.Array` that specifies additional properties
+        such as min and max bounds on the values.
+        """
+
+    @abc.abstractmethod
+    def get_state(self) -> Any:
+        """Returns the environment state."""
+
+    @abc.abstractmethod
+    def set_state(self, state: Any):
+        """Sets the environment state."""
+
+    @abc.abstractmethod
+    def render(self) -> np.ndarray:
+        """Returns an rgb (uint8) numpy array to facilitate visualization.
+
+        The shape of this array should be (width, height, 3), where the last
+        dimension is for red, green, and blue. The values are in [0, 255].
+        """

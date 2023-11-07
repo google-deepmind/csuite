@@ -22,10 +22,10 @@ from dm_env import test_utils
 
 class DMEnvFromCSuiteTest(test_utils.EnvironmentTestMixin, absltest.TestCase):
 
-  def make_object_under_test(self):
-    csuite_env = csuite.load('catch')
-    return csuite.dm_env_wrapper.DMEnvFromCSuite(csuite_env)
+    def make_object_under_test(self):
+        csuite_env = csuite.load('catch')
+        return csuite.dm_env_wrapper.DMEnvFromCSuite(csuite_env)
 
 
 if __name__ == '__main__':
-  absltest.main()
+    absltest.main()

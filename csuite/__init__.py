@@ -24,22 +24,22 @@ from csuite.environments import dancing_catch
 from csuite.environments import pendulum
 from csuite.environments import taxi
 from csuite.environments import windy_catch
+from csuite.environments import puckworld
 from csuite.environments.base import Environment
 from csuite.environments.experimental import pendulum_poke
-from csuite.environments.experimental import puckworld
 from csuite.utils import dm_env_wrapper
 from csuite.utils import gym_wrapper
 
 
 class EnvName(enum.Enum):
-  ACCESS_CONTROL = 'access_control'
-  CATCH = 'catch'
-  DANCING_CATCH = 'dancing_catch'
-  PENDULUM = 'pendulum'
-  PENDULUM_POKE = 'pendulum_poke'
-  TAXI = 'taxi'
-  WINDY_CATCH = 'windy_catch'
-  PUCKWORLD = 'puckworld'
+    ACCESS_CONTROL = 'access_control'
+    CATCH = 'catch'
+    DANCING_CATCH = 'dancing_catch'
+    PENDULUM = 'pendulum'
+    PENDULUM_POKE = 'pendulum_poke'
+    TAXI = 'taxi'
+    WINDY_CATCH = 'windy_catch'
+    PUCKWORLD = 'puckworld'
 
 
 _ENVS = {
@@ -56,15 +56,15 @@ _ENVS = {
 
 def load(name: Union[EnvName, str],
          settings: Optional[Dict[str, Union[float, int, bool]]] = None):
-  """Loads a csuite environment.
+    """Loads a csuite environment.
 
-  Args:
-    name: The enum or string specifying the environment name.
-    settings: Optional `dict` of keyword arguments for the environment.
+    Args:
+      name: The enum or string specifying the environment name.
+      settings: Optional `dict` of keyword arguments for the environment.
 
-  Returns:
-    An instance of the requested environment.
-  """
-  name = EnvName(name)
-  settings = settings or {}
-  return _ENVS[name](**settings)
+    Returns:
+      An instance of the requested environment.
+    """
+    name = EnvName(name)
+    settings = settings or {}
+    return _ENVS[name](**settings)
