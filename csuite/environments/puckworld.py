@@ -4,14 +4,12 @@ Environment description can be found in the `PuckWorld`
 environment class.
 """
 
-import time
 import copy
 import math
 import dataclasses
 import enum
 from typing import Optional
 import numpy as np
-from gym.envs.classic_control import rendering
 
 from dm_env import specs
 from csuite.environments import base
@@ -29,7 +27,6 @@ _GOAL_RADIUS = 0.25
 _GOAL_UPDATE_INTERVAL = 300
 _SIMULATION_STEP_SIZE = 0.05
 _ACT_STEP_PERIOD = 4
-_REWARD_OFFSET = 0
 
 # Error messages.
 _INVALID_ACTION = "Invalid action: expected value in [0,3] but received {}."
@@ -100,7 +97,6 @@ class Params:
     simulation_step_size: float
     act_step_period: int
     max_velocity: float
-    reward_offset: float
 
 
 class PuckWorld(base.Environment):
@@ -111,7 +107,6 @@ class PuckWorld(base.Environment):
                  goal_update_interval=_GOAL_UPDATE_INTERVAL,
                  simulation_step_size=_SIMULATION_STEP_SIZE,
                  act_step_period=_ACT_STEP_PERIOD,
-                 reward_offset=_REWARD_OFFSET,
                  seed=None):
         """Initialize PuckWorld environment.
 
@@ -129,8 +124,7 @@ class PuckWorld(base.Environment):
             goal_update_interval=goal_update_interval,
             simulation_step_size=simulation_step_size,
             act_step_period=act_step_period,
-            max_velocity=max_vel,
-            reward_offset=reward_offset
+            max_velocity=max_vel
         )
 
     def start(self, seed: Optional[int] = None):
@@ -219,7 +213,7 @@ class PuckWorld(base.Environment):
         distance_from_goal = self._compute_distance_from_goal()
         reward = -distance_from_goal
 
-        return self._get_observation(), reward + self._params.reward_offset
+        return self._get_observation(), reward
 
     def _get_observation(self):
         return np.array((self._state.puck_pos_x,
@@ -227,7 +221,8 @@ class PuckWorld(base.Environment):
                          self._state.puck_vel_x,
                          self._state.puck_vel_y,
                          self._state.goal_pos_x,
-                         self._state.goal_pos_y))
+                         self._state.goal_pos_y),
+                        dtype=np.float32)
 
     def _update_goal(self):
         self._state.goal_pos_x = self._state.rng.random() * _WIDTH
@@ -320,24 +315,3 @@ class PuckWorld(base.Environment):
             fill=_GREEN_HEX)
 
         return np.asarray(image, dtype=np.uint8)
-
-
-if __name__ == "__main__":
-    viewer = rendering.SimpleImageViewer()
-    env = PuckWorld()
-    obs = env.start(seed=0)
-    viewer.imshow(env.render())
-    NUM_STEPS = 200
-    velocities = np.zeros(NUM_STEPS)
-    for i in range(NUM_STEPS):
-        # obs, reward = env.step(np.random.choice(4))
-        if obs[3] >= 0:
-            action = 2
-        else:
-            action = 0
-        obs, reward = env.step(action)
-        velocities[i] = obs[3]
-        print(obs, reward)
-        viewer.imshow(env.render())
-        time.sleep(0.05)
-    print(np.max(velocities))

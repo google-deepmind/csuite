@@ -43,7 +43,6 @@ _INVALID_OBS_TYPE = ("Invalid observation type: expected 'discrete' or "
 _ROWS = 10
 _COLUMNS = 5
 _SPAWN_PROBABILITY = 0.1
-_REWARD_OFFSET = 0
 
 
 class Action(enum.IntEnum):
@@ -65,12 +64,10 @@ class Params:
       rows: Integer number of rows.
       columns: Integer number of columns.
       spawn_probability: Probability of a new ball spawning.
-      reward_offset: A constant added to all the rewards.
     """
     rows: int
     columns: int
     spawn_probability: float
-    reward_offset: float
 
 
 @dataclasses.dataclass
@@ -111,7 +108,6 @@ class Catch(base.Environment):
                  rows=_ROWS,
                  columns=_COLUMNS,
                  spawn_probability=_SPAWN_PROBABILITY,
-                 reward_offset=_REWARD_OFFSET,
                  observation_type="discrete",
                  seed=None):
         """Initializes a continuing Catch environment.
@@ -120,7 +116,6 @@ class Catch(base.Environment):
           rows: A positive integer denoting the number of rows.
           columns: A positive integer denoting the number of columns.
           spawn_probability: Float giving the probability of a new ball appearing.
-          reward_offset: A constant added to all the rewards.
           observation_type: A string indicating discrete or continuous.
           seed: Seed for the internal random number generator.
         """
@@ -137,8 +132,7 @@ class Catch(base.Environment):
         self._params = Params(
             rows=rows,
             columns=columns,
-            spawn_probability=spawn_probability,
-            reward_offset=reward_offset)
+            spawn_probability=spawn_probability)
         self._state = None
 
     def start(self, seed: Optional[int] = None):
@@ -205,7 +199,7 @@ class Catch(base.Environment):
             self._state.balls.append(
                 (self._state.rng.integers(self._params.columns), 0))
 
-        return self._get_observation(), reward + self._params.reward_offset
+        return self._get_observation(), reward
 
     def _get_observation_discrete(self) -> np.ndarray:
         """Converts internal environment state to a discrete array observation.

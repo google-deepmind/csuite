@@ -35,7 +35,6 @@ import numpy as np
 _NUM_SERVERS = 10
 _FREE_PROBABILITY = 0.06
 _PRIORITIES = (1, 2, 4, 8)
-_REWARD_OFFSET = 0
 
 # Error messages.
 _INVALID_ACTION = "Invalid action: expected 0 or 1 but received {action}."
@@ -66,7 +65,6 @@ class Params:
     num_servers: int
     free_probability: float
     priorities: list[float]
-    reward_offset: float
 
 
 @dataclasses.dataclass
@@ -110,7 +108,6 @@ class AccessControl(base.Environment):
                  num_servers=_NUM_SERVERS,
                  free_probability=_FREE_PROBABILITY,
                  priorities=_PRIORITIES,
-                 reward_offset=_REWARD_OFFSET,
                  seed=None):
         """Initialize Access-Control environment.
 
@@ -121,15 +118,13 @@ class AccessControl(base.Environment):
             becomes free at each timestep.
           priorities: A list of floats, giving the possible priorities of incoming
             customers.
-          reward_offset: A constant added to all the rewards.
           seed: Seed for the internal random number generator.
         """
         self._seed = seed
         self._params = Params(
             num_servers=num_servers,
             free_probability=free_probability,
-            priorities=priorities,
-            reward_offset=reward_offset)
+            priorities=priorities)
         self.num_states = ((self._params.num_servers + 1) *
                            len(self._params.priorities))
 
@@ -197,7 +192,7 @@ class AccessControl(base.Environment):
         self._state.num_busy_servers = num_busy_servers - num_new_free_servers
         self._state.incoming_priority = new_priority
 
-        return self._get_observation(), reward + self._params.reward_offset
+        return self._get_observation(), reward
 
     def _get_observation(self):
         """Converts internal state to an index uniquely identifying the state.
