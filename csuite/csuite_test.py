@@ -27,87 +27,87 @@ import numpy as np
 
 class CSuiteTest(parameterized.TestCase):
 
-  @parameterized.parameters([e.value for e in csuite.EnvName])
-  def test_envs(self, env_name):
-    """Tests that we can use the environment in typical ways."""
-    env = csuite.load(env_name)
-    action_spec = env.action_spec()
-    observation_spec = env.observation_spec()
+    @parameterized.parameters([e.value for e in csuite.EnvName])
+    def test_envs(self, env_name):
+        """Tests that we can use the environment in typical ways."""
+        env = csuite.load(env_name)
+        action_spec = env.action_spec()
+        observation_spec = env.observation_spec()
 
-    obs = env.start()
-    env.render()
-    init_state = env.get_state()
+        obs = env.start()
+        env.render()
+        init_state = env.get_state()
 
-    for i in range(2):
-      with self.subTest(name="steps-render-successful", step=i):
-        image = env.render()
-      with self.subTest(name="steps-render-compliant", step=i):
-        self._assert_image_compliant(image)
-      with self.subTest(name="steps-observation_spec", step=i):
-        observation_spec.validate(obs)
-      with self.subTest(name="steps-step", step=i):
-        obs, unused_reward = env.step(action_spec.generate_value())
+        for i in range(2):
+            with self.subTest(name="steps-render-successful", step=i):
+                image = env.render()
+            with self.subTest(name="steps-render-compliant", step=i):
+                self._assert_image_compliant(image)
+            with self.subTest(name="steps-observation_spec", step=i):
+                observation_spec.validate(obs)
+            with self.subTest(name="steps-step", step=i):
+                obs, unused_reward = env.step(action_spec.generate_value())
 
-    env.set_state(init_state)
+        env.set_state(init_state)
 
-  @parameterized.parameters([e.value for e in csuite.EnvName])
-  def test_env_state_resets(self, env_name):
-    """Tests that `get`ing and `set`ing state results in reproducibility."""
-    # Since each environment is different, we employ a generic strategy that
-    # should
-    #
-    # a) get us to a variety of states to query the state on,
-    # b) take a number of steps from that state to check reproducibility.
-    #
-    # See the implementation for the specific strategy taken.
-    num_steps_to_check = 4
-    env = csuite.load(env_name)
-    env.start()
-    action_spec = env.action_spec()
+    @parameterized.parameters([e.value for e in csuite.EnvName])
+    def test_env_state_resets(self, env_name):
+        """Tests that `get`ing and `set`ing state results in reproducibility."""
+        # Since each environment is different, we employ a generic strategy that
+        # should
+        #
+        # a) get us to a variety of states to query the state on,
+        # b) take a number of steps from that state to check reproducibility.
+        #
+        # See the implementation for the specific strategy taken.
+        num_steps_to_check = 4
+        env = csuite.load(env_name)
+        env.start()
+        action_spec = env.action_spec()
 
-    if not isinstance(action_spec, specs.DiscreteArray):
-      raise NotImplementedError(
-          "This test only supports environments with discrete action "
-          "spaces for now. Please raise an issue if you want to work with a "
-          "a non-discrete action space.")
+        if not isinstance(action_spec, specs.DiscreteArray):
+            raise NotImplementedError(
+                "This test only supports environments with discrete action "
+                "spaces for now. Please raise an issue if you want to work with a "
+                "a non-discrete action space.")
 
-    action_spec = typing.cast(specs.DiscreteArray, action_spec)
-    for action in range(action_spec.num_values):
-      env.step(action)
-      orig_state = env.get_state()
-      outputs_1 = [env.step(action) for _ in range(num_steps_to_check)]
-      observations_1, rewards_1 = zip(*outputs_1)
-      env.set_state(orig_state)
-      outputs_2 = [env.step(action) for _ in range(num_steps_to_check)]
-      observations_2, rewards_2 = zip(*outputs_2)
-      with self.subTest("observations", action=action):
-        self.assertSameObsSequence(observations_1, observations_2)
-      with self.subTest("rewards", action=action):
-        self.assertSequenceEqual(rewards_1, rewards_2)
+        action_spec = typing.cast(specs.DiscreteArray, action_spec)
+        for action in range(action_spec.num_values):
+            env.step(action)
+            orig_state = env.get_state()
+            outputs_1 = [env.step(action) for _ in range(num_steps_to_check)]
+            observations_1, rewards_1 = zip(*outputs_1)
+            env.set_state(orig_state)
+            outputs_2 = [env.step(action) for _ in range(num_steps_to_check)]
+            observations_2, rewards_2 = zip(*outputs_2)
+            with self.subTest("observations", action=action):
+                self.assertSameObsSequence(observations_1, observations_2)
+            with self.subTest("rewards", action=action):
+                self.assertSequenceEqual(rewards_1, rewards_2)
 
-  def assertSameObsSequence(self, seq1, seq2):
-    """The observations are expected to be numpy objects."""
-    # self.assertSameStructure(seq1, seq2)
-    problems = []  # (idx, problem str)
-    for idx, (el1, el2) in enumerate(zip(seq1, seq2)):
-      try:
-        np.testing.assert_array_equal(el1, el2)
-      except AssertionError as e:
-        problems.append((idx, str(e)))
+    def assertSameObsSequence(self, seq1, seq2):
+        """The observations are expected to be numpy objects."""
+        # self.assertSameStructure(seq1, seq2)
+        problems = []  # (idx, problem str)
+        for idx, (el1, el2) in enumerate(zip(seq1, seq2)):
+            try:
+                np.testing.assert_array_equal(el1, el2)
+            except AssertionError as e:
+                problems.append((idx, str(e)))
 
-    if problems:
-      self.fail(
-          f"The observation sequences (of length {len(seq1)}) are not the "
-          "same. The differences are:\n" +
-          "\n".join([f"at idx={idx}: {msg}" for idx, msg in problems]))
+        if problems:
+            self.fail(
+                f"The observation sequences (of length {len(seq1)}) are not the "
+                "same. The differences are:\n" +
+                "\n".join([f"at idx={idx}: {msg}" for idx, msg in problems]))
 
-  def _assert_image_compliant(self, image: np.ndarray):
-    if not (len(image.shape) == 3 and image.shape[-1] == 3 and
-            image.dtype == np.uint8):
-      self.fail(
-          "The render() method is expected to return an uint8 rgb image array. "
-          f"Got an array of shape {image.shape}, dtype {image.dtype}.")
+    def _assert_image_compliant(self, image: np.ndarray):
+        if not (len(image.shape) == 3 and image.shape[-1] == 3 and
+                image.dtype == np.uint8):
+            self.fail(
+                "The render() method is expected to return an uint8 rgb image array. "
+                f"Got an array of shape {image.shape}, dtype {image.dtype}.")
 
 
 if __name__ == "__main__":
-  absltest.main()
+    absltest.main()

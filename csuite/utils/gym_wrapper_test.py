@@ -22,13 +22,13 @@ from gym.utils import env_checker as gym_env_checker
 
 class GymFromCSuiteTest(absltest.TestCase):
 
-  def test_env_checker(self):
-    csuite_env = csuite.load('catch')
-    gym_env = csuite.gym_wrapper.GymFromCSuite(csuite_env)
-    # Gym's env_checker.check_env throws an exception if the env does not
-    # conform to the Gym API:
-    gym_env_checker.check_env(gym_env)
+    def test_env_checker(self):
+        csuite_env = csuite.load('catch')
+        gym_env = csuite.gym_wrapper.GymFromCSuite(csuite_env)
+        # Gym's env_checker.check_env throws an exception if the env does not
+        # conform to the Gym API:
+        gym_env_checker.check_env(gym_env)
 
 
 if __name__ == '__main__':
-  absltest.main()
+    absltest.main()

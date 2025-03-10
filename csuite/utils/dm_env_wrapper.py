@@ -20,39 +20,39 @@ import dm_env
 
 
 class DMEnvFromCSuite(dm_env.Environment):
-  """A wrapper to convert a CSuite environment to a dm_env.Environment."""
+    """A wrapper to convert a CSuite environment to a dm_env.Environment."""
 
-  def __init__(self, csuite_env: base.Environment):
-    self._csuite_env = csuite_env
-    self._started = False
+    def __init__(self, csuite_env: base.Environment):
+        self._csuite_env = csuite_env
+        self._started = False
 
-  def reset(self) -> dm_env.TimeStep:
-    observation = self._csuite_env.start()
-    self._started = True
-    return dm_env.restart(observation)
+    def reset(self) -> dm_env.TimeStep:
+        observation = self._csuite_env.start()
+        self._started = True
+        return dm_env.restart(observation)
 
-  def step(self, action) -> dm_env.TimeStep:
-    if not self._started:
-      return self.reset()
-    # Convert the csuite step result to a dm_env TimeStep.
-    observation, reward = self._csuite_env.step(action)
-    return dm_env.TimeStep(
-        step_type=dm_env.StepType.MID,
-        observation=observation,
-        reward=reward,
-        discount=1.0)
+    def step(self, action) -> dm_env.TimeStep:
+        if not self._started:
+            return self.reset()
+        # Convert the csuite step result to a dm_env TimeStep.
+        observation, reward = self._csuite_env.step(action)
+        return dm_env.TimeStep(
+            step_type=dm_env.StepType.MID,
+            observation=observation,
+            reward=reward,
+            discount=1.0)
 
-  def observation_spec(self):
-    return self._csuite_env.observation_spec()
+    def observation_spec(self):
+        return self._csuite_env.observation_spec()
 
-  def action_spec(self):
-    return self._csuite_env.action_spec()
+    def action_spec(self):
+        return self._csuite_env.action_spec()
 
-  def get_state(self):
-    return self._csuite_env.get_state()
+    def get_state(self):
+        return self._csuite_env.get_state()
 
-  def set_state(self, state):
-    self._csuite_env.set_state(state)
+    def set_state(self, state):
+        self._csuite_env.set_state(state)
 
-  def render(self):
-    return self._csuite_env.render()
+    def render(self):
+        return self._csuite_env.render()
